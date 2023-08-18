@@ -8,17 +8,29 @@ from tkinter import ttk, Canvas, Frame, Scrollbar
 import csv 
 import crawler  # Importing functions from crawler.py
 import hyperlink_crawler as hc  # Importing functions from hyperlink_crawler.py
+import report_download as dl  # Importing functions from download.py
 
 clicked_buttons = [] 
+
+def ok_clicked(flag):
+    status_text.insert(tk.END, "\n")
+    status_text.insert(tk.END, "OK button clicked.")
+    print("OK button clicked.")
+
+    year = int(year_entry.get())
+
+    dl.run(year+1911, flag)
+    status_text.insert(tk.END, "\n")
+    status_text.insert(tk.END, "Download Completed.")
 
 def reset_clicked():
     global clicked_buttons
     clicked_buttons.clear()
     print("Reset button clicked.")
 
-def ok_clicked():
+def link_clicked():
     status_text.insert(tk.END, f"selected columns' id: {clicked_buttons}")
-    print("OK button clicked.")
+    print("\"Get Link\" button clicked.")
     year = int(year_entry.get())
     hc.run(year, clicked_buttons, num_cols)
     
@@ -64,7 +76,7 @@ def get_table():
     status_text.insert(tk.END, "\n")
     status_text.insert(tk.END, f"Number of columns: {num_cols}")
     status_text.insert(tk.END, "\n")
-    status_text.insert(tk.END, f"Data processed and saved to table_{year + 1911}.csv")
+    status_text.insert(tk.END, f"Data processed and saved to ./output/table/table_{year + 1911}.csv")
 
 
 def start_process():
@@ -91,9 +103,8 @@ ttk.Label(root, text="Enter Year:").pack(pady=10)
 year_entry = ttk.Entry(root)
 year_entry.pack(pady=10)
 
-
 # Button to start the process
-start_button = ttk.Button(root, text="Start Process", command=start_process)
+start_button = ttk.Button(root, text="1. Start Process", command=start_process)
 start_button.pack(pady=10)
 
 # Text area to display status messages
@@ -101,12 +112,25 @@ status_text = tk.Text(root, height=8, width=50)
 status_text.pack(pady=10)
 
 # Frame for Reset and OK buttons
-buttons_control_frame = Frame(root)
-buttons_control_frame.pack(pady=10)
-reset_button = ttk.Button(buttons_control_frame, text="Reset", command=reset_clicked)
+buttons_control_frame_1 = Frame(root)
+buttons_control_frame_1.pack(pady=10)
+reset_button = ttk.Button(buttons_control_frame_1, text="Reset", command=reset_clicked)
 reset_button.pack(side=tk.LEFT, padx=10)
-ok_button = ttk.Button(buttons_control_frame, text="OK", command=ok_clicked)
-ok_button.pack(side=tk.LEFT, padx=10)
+link_button = ttk.Button(buttons_control_frame_1, text="2. Get Link", command=link_clicked)
+link_button.pack(side=tk.LEFT, padx=10)
+
+# Create a new frame below the previous frame for the new buttons
+buttons_control_frame_2 = Frame(root)
+buttons_control_frame_2.pack(pady=10)
+
+# Create the "Test" button and pack it to the left within the new frame
+test_button = ttk.Button(buttons_control_frame_2, text="3. Test", command=lambda: ok_clicked(0))
+test_button.pack(side=tk.LEFT, padx=10)
+
+# Create the "Get All Report" button and pack it to the left within the new frame
+get_all_report_button = ttk.Button(buttons_control_frame_2, text="4. Get All Report", command=lambda: ok_clicked(1))
+get_all_report_button.pack(side=tk.LEFT, padx=10)
+
 
 root.mainloop()
 
