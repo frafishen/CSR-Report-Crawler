@@ -44,7 +44,7 @@ def get_table_for_year(year: int) -> pd.DataFrame:
 
     # Use the merge_header_cells function to process combined_header_html
     merged_header = merge_header_cells(combined_header_html)
-    add_col_list = ['CSR報告超連結', '公司完整名稱', '統一編號']
+    add_col_list = ['公司完整名稱', '統一編號']
     add_col_df = pd.DataFrame(add_col_list).T
     header_df = pd.DataFrame([merged_header])
     header_df = pd.concat([header_df,add_col_df], axis=1, ignore_index=True)
@@ -69,6 +69,7 @@ def get_table_for_year(year: int) -> pd.DataFrame:
 def run(year):
     result = get_table_for_year(year)
     result.to_csv("./output/table/table_{}.csv".format(year+1911), encoding='utf-8', index=False)
+    return result.shape[1]
 
 def main():
     year = 111

@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import ttk, Canvas, Frame, Scrollbar
 import csv 
 import crawler  # Importing functions from crawler.py
+import hyperlink_crawler as hc  # Importing functions from hyperlink_crawler.py
 
 clicked_buttons = [] 
 
@@ -16,11 +17,21 @@ def reset_clicked():
     print("Reset button clicked.")
 
 def ok_clicked():
+    status_text.insert(tk.END, f"selected columns' id: {clicked_buttons}")
     print("OK button clicked.")
+    year = int(year_entry.get())
+    hc.run(year, clicked_buttons, num_cols)
+    
+    reset_clicked()
+
+    status_text.insert(tk.END, "\n")
+    status_text.insert(tk.END, "Hyperlink Crawling Completed.")
 
 def button_clicked(button_id):
     print(button_id)
     clicked_buttons.append(button_id)
+    status_text.insert(tk.END, "\n")
+    status_text.insert(tk.END, f"selected columns' id: {clicked_buttons}")
 
 def display_csv_buttons(csv_path):
     global buttons_frame
@@ -47,9 +58,14 @@ def display_csv_buttons(csv_path):
 def get_table():
     year = int(year_entry.get())
     crawler.year = year  # Setting the year in crawler.py
-    crawler.run(year)  # Calling the main function from crawler.py
+    global num_cols
+    num_cols = crawler.run(year)  # Calling the main function from crawler.py
     status_text.delete(1.0, tk.END)
+    status_text.insert(tk.END, "\n")
+    status_text.insert(tk.END, f"Number of columns: {num_cols}")
+    status_text.insert(tk.END, "\n")
     status_text.insert(tk.END, f"Data processed and saved to table_{year + 1911}.csv")
+
 
 def start_process():
     year = int(year_entry.get())
@@ -60,8 +76,8 @@ def start_process():
 
 # Creating main window
 root = tk.Tk()
-root.title("GUI for Crawler")
-root.geometry("1200x500")
+root.title("CSR Report Crawler")
+root.geometry("1200x600")
 
 canvas = Canvas(root)
 canvas.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
@@ -81,7 +97,7 @@ start_button = ttk.Button(root, text="Start Process", command=start_process)
 start_button.pack(pady=10)
 
 # Text area to display status messages
-status_text = tk.Text(root, height=5, width=50)
+status_text = tk.Text(root, height=8, width=50)
 status_text.pack(pady=10)
 
 # Frame for Reset and OK buttons
