@@ -1,6 +1,6 @@
 """
 Created on Fri. Aug. 18, 2023
-@author: Jenny Shen
+@author: Jie-Yu Shen
 """
 
 from selenium.webdriver.common.by import By

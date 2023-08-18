@@ -1,6 +1,6 @@
 """
 Created on Fri. Aug. 18, 2023
-@author: Jenny Shen
+@author: Jie-Yu Shen
 """
 
 from selenium import webdriver
@@ -21,7 +21,7 @@ def extract_url_from_row(row, xpaths):
             continue
     return None
 
-def getHyperlink(year):
+def getHyperlink(year, _ori, _modified):
     browser = surf(year, 5)
 
     # Extract table data

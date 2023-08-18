@@ -1,6 +1,6 @@
 """
 Created on Fri. Aug. 18, 2023
-@author: Jenny Shen
+@author: Jie-Yu Shen
 """
 
 import tkinter as tk
@@ -8,12 +8,20 @@ from tkinter import ttk, Canvas, Frame, Scrollbar
 import csv 
 import crawler  # Importing functions from crawler.py
 
+clicked_buttons = [] 
+
+
+
+def button_clicked(button_id):
+    print(button_id)
+    clicked_buttons.append(button_id)
 
 def display_csv_buttons(csv_path):
     global buttons_frame
     if "buttons_frame" in globals():
         buttons_frame.destroy()
     buttons_frame = Frame(canvas)
+
     canvas.create_window((0,0), window=buttons_frame, anchor="nw")
     with open(csv_path, 'r') as file:
         reader = csv.reader(file)
@@ -21,7 +29,11 @@ def display_csv_buttons(csv_path):
         headers = next(reader)
         for i, header in enumerate(headers):
             row, col = divmod(i, 5)
-            ttk.Button(buttons_frame, text=header).grid(row=row, column=col, padx=5, pady=5)
+            
+            button = ttk.Button(buttons_frame, text=header)
+            button.grid(row=row, column=col, padx=5, pady=5)
+            button.bind("<Button-1>", lambda event, id=i+1: button_clicked(id))
+
     buttons_frame.update_idletasks()
     canvas.config(scrollregion=canvas.bbox("all"))
 
@@ -66,3 +78,5 @@ status_text = tk.Text(root, height=5, width=50)
 status_text.pack(pady=10)
 
 root.mainloop()
+
+
