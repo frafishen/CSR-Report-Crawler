@@ -1,3 +1,8 @@
+"""
+Created on Fri. Aug. 18, 2023
+@author: Jenny Shen
+"""
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
