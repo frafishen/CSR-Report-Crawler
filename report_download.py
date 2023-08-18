@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
 def run(year, flag):
     companyData_path = f"./output/table/table_{year}.csv"
-    companyName_path = "company_name_number.csv"
+    companyName_path = "./bin/company_name_number.csv"
     download_path = "output"
     pdf_dir = "./output/pdf/"
     jpg_save_dir = "output/jpg"

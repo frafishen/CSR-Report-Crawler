@@ -6,7 +6,7 @@ import time
 
 def surf(year, sec):
 # Path to the driver (change this to the location where your driver is)
-    DRIVER_PATH = './chromedriver'
+    DRIVER_PATH = './bin/chromedriver'
     chrome_options = Options()
     chrome_options.executable_path = DRIVER_PATH
     browser = webdriver.Chrome(options=chrome_options)
