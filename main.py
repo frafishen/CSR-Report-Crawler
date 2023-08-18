@@ -5,6 +5,7 @@ Created on Fri. Aug. 18, 2023
 
 import tkinter as tk
 from tkinter import ttk, Canvas, Frame, Scrollbar
+import os
 import csv 
 import crawler  # Importing functions from crawler.py
 import hyperlink_crawler as hc  # Importing functions from hyperlink_crawler.py
@@ -85,6 +86,12 @@ def start_process():
 
     get_table()
     display_csv_buttons(headers_path)
+
+
+required_dirs = ["output", "output/jpg", "output/pdf", "output/table"]
+for dir_name in required_dirs:
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
 
 # Creating main window
 root = tk.Tk()
