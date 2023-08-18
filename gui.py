@@ -10,7 +10,13 @@ import crawler  # Importing functions from crawler.py
 
 clicked_buttons = [] 
 
+def reset_clicked():
+    global clicked_buttons
+    clicked_buttons.clear()
+    print("Reset button clicked.")
 
+def ok_clicked():
+    print("OK button clicked.")
 
 def button_clicked(button_id):
     print(button_id)
@@ -69,6 +75,7 @@ ttk.Label(root, text="Enter Year:").pack(pady=10)
 year_entry = ttk.Entry(root)
 year_entry.pack(pady=10)
 
+
 # Button to start the process
 start_button = ttk.Button(root, text="Start Process", command=start_process)
 start_button.pack(pady=10)
@@ -76,6 +83,14 @@ start_button.pack(pady=10)
 # Text area to display status messages
 status_text = tk.Text(root, height=5, width=50)
 status_text.pack(pady=10)
+
+# Frame for Reset and OK buttons
+buttons_control_frame = Frame(root)
+buttons_control_frame.pack(pady=10)
+reset_button = ttk.Button(buttons_control_frame, text="Reset", command=reset_clicked)
+reset_button.pack(side=tk.LEFT, padx=10)
+ok_button = ttk.Button(buttons_control_frame, text="OK", command=ok_clicked)
+ok_button.pack(side=tk.LEFT, padx=10)
 
 root.mainloop()
 
