@@ -32,7 +32,7 @@ def merge_header_cells(header_html: str) -> (list[str] | list):
     return merged_header
 
 def get_table_for_year(year: int) -> pd.DataFrame:
-    browser = surf(year, 5)
+    browser = surf(year, 10)
 
     # Extract table data
     # Locate the table and extract its data

@@ -10,10 +10,19 @@ import os
 import glob
 from pdf2image import convert_from_path
 from tqdm import tqdm
+import sys
+import os
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
 
 def main():
     companyData_path = "table_2022.csv"
-    companyName_path = "company_name_number.csv"
+    companyName_path = resource_path('./bin/company_name_number.csv')
+
     year = "2022"
     download_path = "output"
     pdf_dir = "./output/pdf/"

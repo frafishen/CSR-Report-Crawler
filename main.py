@@ -11,6 +11,7 @@ import crawler  # Importing functions from crawler.py
 import hyperlink_crawler as hc  # Importing functions from hyperlink_crawler.py
 import report_download as dl  # Importing functions from download.py
 
+
 clicked_buttons = [] 
 
 def ok_clicked(flag):
