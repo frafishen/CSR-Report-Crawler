@@ -3,7 +3,7 @@
 Web Open Script
 ---------------
 This script contains functions to open web pages using Selenium and perform specific actions.
-Created on Fri. Aug. 18, 2023
+Created on Fri. Aug. 22, 2023
 @author: Jie-Yu Shen
 """
 

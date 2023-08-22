@@ -2,7 +2,7 @@
 Report Download Script
 ----------------------
 This script contains functions to download reports and convert them to images.
-Created on Fri. Aug. 18, 2023
+Created on Fri. Aug. 22, 2023
 @author: Jie-Yu Shen
 """
 
