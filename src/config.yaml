@@ -1,0 +1,11 @@
+COMPANY:
+  TABLE_PATH: ../output/table/
+  NAME_PATH: ../bin/company_name_number.csv
+SAVE:
+  ROOT_DIR: ../output/
+  PDF_DIR: ../output/pdf/
+  IMG_DIR: ../output/jpg/
+CONSTANT:
+  WEB_PATH: https://mops.twse.com.tw/mops/web/t100sb11
+  DRIVER_PATH: ../bin/chromedriver
+  YEAR_DEFUALT: 111
