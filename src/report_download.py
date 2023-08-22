@@ -1,32 +1,57 @@
 """
+Report Download Script
+----------------------
+This script contains functions to download reports and convert them to images.
 Created on Fri. Aug. 18, 2023
 @author: Jie-Yu Shen
 """
 
+import os
+import sys
+import glob
+import yaml
 import pandas as pd
 import urllib.request
 from time import sleep
 from pdf2image import convert_from_path
 from tqdm import tqdm
-import os, glob, sys, os, yaml
 
-def init():
+# Constants
+CONFIG_FILE_PATH = './config.yaml'
+CONFIG = None
+TABLE_PATH = None
+COMPANY_NAME = None
+PDF_DIR = None
+JPG_DIR = None
+
+def load_config():
+    """Load configuration from the YAML file."""
     global CONFIG, TABLE_PATH, COMPANY_NAME, PDF_DIR, JPG_DIR
-    with open('./config.yaml', 'r') as file:
+    with open(CONFIG_FILE_PATH, 'r') as file:
         CONFIG = yaml.safe_load(file)
-    
     TABLE_PATH = CONFIG['COMPANY']['TABLE_PATH']
     COMPANY_NAME = CONFIG['COMPANY']['NAME_PATH']
     PDF_DIR = CONFIG['SAVE']['PDF_DIR']
     JPG_DIR = CONFIG['SAVE']['IMG_DIR']
 
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+    """Get absolute path to resource, works for dev and for PyInstaller"""
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
+def read_data(company_data_path, company_name_path):
+    """Read and preprocess company data and company names from given paths."""
+    data = pd.read_csv(company_data_path, encoding='utf-8', header=None)
+    data = data.drop(0)
+    new_header = data.iloc[0]
+    data = data[1:]
+    data.columns = new_header
+
+    company_name = pd.read_csv(company_name_path, encoding='utf-8')
+    return data, company_name
 
 def main():
+    """Main function to orchestrate report downloading and processing."""
     companyData_path = "../table_2022.csv"
     companyName_path = resource_path('../bin/company_name_number.csv')
 
@@ -40,20 +65,8 @@ def main():
     download_files(data, download_path, year)
     convert_pdf_to_jpg(pdf_dir, jpg_save_dir)
 
-def read_data(company_data_path, company_name_path):
-    # title = pd.read_csv('header_row.csv', encoding='utf-8', header=None)
-    data = pd.read_csv(company_data_path, encoding='utf-8', header=None)
-    # Drop the original header
-    data = data.drop(0)
-    # Set the second row as the new header
-    new_header = data.iloc[0]
-    data = data[1:]
-    data.columns = new_header
-
-    company_name = pd.read_csv(company_name_path, encoding='utf-8')
-    return data, company_name
-
 def match_and_modify_data(data, company_name):
+    """Match and modify data using company names."""
     for i in range(len(data["公司代號"])):
         for j in range(len(company_name["公司代號"])):
             if str(data["公司代號"].iloc[i]) == company_name["公司代號"].iloc[j]:
@@ -63,7 +76,6 @@ def match_and_modify_data(data, company_name):
  
     data['統一編號'] = data['統一編號'].str.replace('\t', '')
     return data
-
 
 def download_files(data, download_path, year, flag):
     if flag == 1:
@@ -93,9 +105,8 @@ def convert_pdf_to_jpg(pdf_dir, jpg_save_dir):
 if __name__ == "__main__":
     main()
 
-
 def run(year, flag):
-    init()
+    load_config()
 
     companyData_path = f"{TABLE_PATH}table_{year}.csv"
 

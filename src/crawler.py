@@ -1,5 +1,8 @@
 """
-Created on Fri. Aug. 18, 2023
+Crawler Script
+---------------
+This script contains functions to crawl a website and extract table data using Selenium and BeautifulSoup.
+Created on Fri. Aug. 22, 2023
 @author: Jie-Yu Shen
 """
 
@@ -9,21 +12,24 @@ import pandas as pd
 import yaml
 from webOpen import surf
 
-# pip install bs4
-# pip install html5lib
+# Constants
+CONFIG_FILE_PATH = './config.yaml'
+TABLE_PATH = None
 
-def init():
-    global CONFIG, TABLE_PATH
-    with open('./config.yaml', 'r') as file:
-        CONFIG = yaml.safe_load(file)
-    
-    TABLE_PATH = CONFIG['COMPANY']['TABLE_PATH']
+def load_config():
+    """Load configuration from YAML file."""
+    global TABLE_PATH
+    with open(CONFIG_FILE_PATH, 'r') as file:
+        config = yaml.safe_load(file)
+    TABLE_PATH = config['COMPANY']['TABLE_PATH']
 
-def merge_header_cells(header_html: str) -> (list[str] | list):
+def merge_header_cells(header_html: str) -> list[str]:
+    """Merge header cells for tables with two rows of headers."""
     soup = BeautifulSoup(header_html, "html.parser")
     rows = soup.find_all("tr")
     if len(rows) == 1:
         return [cell.get_text(strip=True) for cell in rows[0].find_all("td")]
+
     primary_header_cells = rows[0].find_all("td")
     secondary_header_cells = rows[1].find_all("td")
     merged_header = []
@@ -39,12 +45,8 @@ def merge_header_cells(header_html: str) -> (list[str] | list):
                 secondary_index += 1
     return merged_header
 
-def get_table_for_year(year: int) -> pd.DataFrame:
-    browser = surf(year, 10)
-
-    # Extract table data
-    # Locate the table and extract its data
-
+def extract_table_data(browser, year: int) -> pd.DataFrame:
+    """Extract table data from the website for a given year."""
     # Get the first two header rows with the class 'tblHead'
     header_row_elements = browser.find_elements(By.XPATH, '//*[@id="table01"]/table/tbody/tr[contains(@class, "tblHead")]')[:2]
     header_rows_html = [elem.get_attribute('outerHTML') for elem in header_row_elements]
@@ -52,14 +54,11 @@ def get_table_for_year(year: int) -> pd.DataFrame:
 
     # Use the merge_header_cells function to process combined_header_html
     merged_header = merge_header_cells(combined_header_html)
-    add_col_list = ['公司完整名稱', '統一編號']
-    add_col_df = pd.DataFrame(add_col_list).T
+    additional_columns = ['公司完整名稱', '統一編號']
+    additional_columns_df = pd.DataFrame(additional_columns).T
     header_df = pd.DataFrame([merged_header])
-    header_df = pd.concat([header_df,add_col_df], axis=1, ignore_index=True)
+    header_df = pd.concat([header_df, additional_columns_df], axis=1, ignore_index=True)
 
-    # # Parse header_row_html to extract data
-    # header_df = pd.read_html(f"<table>{header_row_html}</table>")[0]
-    # Handle <br> elements to separate data and save to CSV
     header_df.to_csv(f"{TABLE_PATH}header_row_{year+1911}.csv", index=False)
 
     table_rows = browser.find_elements(By.XPATH, '//*[@id="table01"]/table/tbody/tr[contains(@class, "odd") or contains(@class, "even")]')
@@ -67,25 +66,28 @@ def get_table_for_year(year: int) -> pd.DataFrame:
     table_html = "<table>" + "".join(rows_html) + "</table>"
     df_rows = pd.read_html(table_html)[0]
 
-    df = pd.concat([header_df, df_rows], axis=0, ignore_index=True)
-    # Close the browser
+    combined_df = pd.concat([header_df, df_rows], axis=0, ignore_index=True)
+    return combined_df
+
+def get_table_for_year(year: int) -> pd.DataFrame:
+    """Get table data for a specific year."""
+    browser = surf(year, 10)
+    data_frame = extract_table_data(browser, year)
     browser.quit()
+    return data_frame
 
-    return df
-
-
-def run(year):
-    init()
-    
+def run(year: int) -> int:
+    """Main function to run the crawler for a specific year."""
+    load_config()
     result = get_table_for_year(year)
     result.to_csv(f"{TABLE_PATH}table_{year+1911}.csv", encoding='utf-8', index=False)
     return result.shape[1]
 
 def main():
+    """Main entry point of the script."""
     year = 111
     result = get_table_for_year(year)
     result.to_csv("../output/table/table_{}.csv".format(year+1911), encoding='utf-8', index=False)
-
 
 if __name__ == "__main__":
     main()

@@ -1,19 +1,27 @@
 """
-Created on Fri. Aug. 18, 2023
+Hyperlink Crawler Script
+------------------------
+This script contains functions to crawl a website and extract hyperlink data using Selenium.
+Created on Fri. Aug. 22, 2023
 @author: Jie-Yu Shen
 """
 
 from selenium.webdriver.common.by import By
 import pandas as pd
 from webOpen import surf
-import time, yaml
+import time
+import yaml
 
-def init():
-    global CONFIG, TABLE_PATH
-    with open('./config.yaml', 'r') as file:
-        CONFIG = yaml.safe_load(file)
-    
-    TABLE_PATH = CONFIG['COMPANY']['TABLE_PATH']
+# Constants
+CONFIG_FILE_PATH = './config.yaml'
+TABLE_PATH = None
+
+def load_config():
+    """Load configuration from the YAML file."""
+    global TABLE_PATH
+    with open(CONFIG_FILE_PATH, 'r') as file:
+        config = yaml.safe_load(file)
+    TABLE_PATH = config['COMPANY']['TABLE_PATH']
 
 def extract_url_from_row(row, xpaths):
     """Extract the URL from the row using the provided XPaths."""
@@ -25,63 +33,54 @@ def extract_url_from_row(row, xpaths):
             continue
     return None
 
-def getHyperlink(year: int, selected_columns: list[str, str]) -> list[str]:
-    _ori = selected_columns[0]
-    _modified = selected_columns[1]
-
-    browser = surf(year, 5)
-
-    # Extract table data
+def extract_hyperlinks_from_table(browser, selected_columns):
+    """Extract hyperlinks from a specified table in the browser."""
     table_element = browser.find_element(By.XPATH, '//*[@id="table01"]/table')
-     # Extract all the URLs from the table
     rows = table_element.find_elements(By.XPATH, './tbody/tr')
-    xpaths = [f"./td[{_ori}]/a", f"./td[{_modified}]/a"]
-
+    xpaths = [f"./td[{selected_columns[0]}]/a", f"./td[{selected_columns[1]}]/a"]
     urls = [extract_url_from_row(row, xpaths) for row in rows]
+    return [url for url in urls if url and url.endswith('.pdf')]
 
-    # Remove empty values from the urls list
-    urls = [url for url in urls if url is not None]
-    urls = [url for url in urls if url and url[-3:] == 'pdf']
+def save_hyperlinks_to_csv(year, df_urls):
+    """Save the extracted hyperlinks to a CSV file."""
+    df_urls.to_csv(f"{TABLE_PATH}url_{year+1911}.csv", encoding='utf-8', index=False)
 
-    # Allow some time for the table to load
-    time.sleep(5)
+def merge_hyperlinks_with_table(year):
+    """Merge the hyperlinks with the main table and save it to a CSV."""
+    main_df = pd.read_csv(f"{TABLE_PATH}table_{year+1911}.csv", encoding='utf-8')
+    urls_df = pd.read_csv(f"{TABLE_PATH}url_{year+1911}.csv", encoding='utf-8')
+    combined_df = pd.concat([main_df, urls_df], axis=1)
+    combined_df.to_csv(f"{TABLE_PATH}table_{year+1911}.csv", encoding='utf-8', index=False)
 
-    # Close the browser
-    browser.quit()
-
-    return urls
-
-def save_urls_to_csv(year):
-    df = pd.read_csv(f"{TABLE_PATH}table_{year+1911}.csv", encoding='utf-8')
-    df_urls = pd.read_csv(f"{TABLE_PATH}url_{year+1911}.csv", encoding='utf-8')
-    print(f"len of table: {len(df)}")
-    print(f"len of df_urls: {len(df_urls)}")
-    df = pd.concat([df, df_urls], axis=1, ignore_index=True)
-    df.to_csv(f"{TABLE_PATH}table_{year+1911}.csv", encoding='utf-8', index=False)
-
-
+def format_dataframe(urls, column_name):
+    """Format the extracted URLs into a DataFrame."""
+    df_urls = pd.DataFrame(urls, columns=[column_name])
+    # Adding a header to the DataFrame
+    header_row = pd.DataFrame(['CSR報告超連結'], columns=[column_name])
+    df_urls = pd.concat([header_row, df_urls]).reset_index(drop=True)
+    
+    return df_urls
 
 def run(year, selected_columns, len_columns):
-    init()
-
-    urls = getHyperlink(year, selected_columns)
-    df_urls = pd.DataFrame(urls, columns=['CSR報告超連結'], index=None)
-
-    df_urls.columns = [len_columns]
-    df_urls.loc[-1] = ['CSR報告超連結']  
-    df_urls.index = df_urls.index + 1 
-    df_urls = df_urls.sort_index()  
+    """Main function to run the hyperlink crawler for a specific year."""
+    load_config()
     
-    TABLE_PATH = CONFIG['COMPANY']['TABLE_PATH']
-    df_urls.to_csv(f"{TABLE_PATH}url_{year+1911}.csv", encoding='utf-8', index=False)
-    save_urls_to_csv(year)
+    # Initialize the browser and extract hyperlinks
+    browser = surf(year, 5)
+    urls = extract_hyperlinks_from_table(browser, selected_columns)
+    browser.quit()
+    
+    # Prepare the DataFrame for the extracted URLs
+    df_urls = format_dataframe(urls, len_columns)
+    
+    save_hyperlinks_to_csv(year, df_urls)
+    merge_hyperlinks_with_table(year)
 
 def main():
+    """Main entry point of the script."""
     year = 111
-    urls = getHyperlink(year)
-    df_urls = pd.DataFrame(urls, columns=['CSR報告超連結'], index=None)
-    df_urls.to_csv('url_2022.csv', encoding='utf-8')
-    save_urls_to_csv(urls)
+    selected_columns = [12, 17]  # Example columns to select
+    run(year, selected_columns)
 
 if __name__ == "__main__":
     main()
