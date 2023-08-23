@@ -9,7 +9,6 @@ Created on Fri. Aug. 22, 2023
 from selenium.webdriver.common.by import By
 import pandas as pd
 from webOpen import surf
-import time
 import yaml
 
 # Constants

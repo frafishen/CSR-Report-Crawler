@@ -50,20 +50,6 @@ def read_data(company_data_path, company_name_path):
     company_name = pd.read_csv(company_name_path, encoding='utf-8')
     return data, company_name
 
-def main():
-    """Main function to orchestrate report downloading and processing."""
-    companyData_path = "../table_2022.csv"
-    companyName_path = resource_path('../bin/company_name_number.csv')
-
-    year = "2022"
-    download_path = "output"
-    pdf_dir = "../output/pdf/"
-    jpg_save_dir = "../output/jpg"
-
-    data, company_name = read_data(companyData_path, companyName_path)
-    data = match_and_modify_data(data, company_name)
-    download_files(data, download_path, year)
-    convert_pdf_to_jpg(pdf_dir, jpg_save_dir)
 
 def match_and_modify_data(data, company_name):
     """Match and modify data using company names."""
@@ -101,6 +87,20 @@ def convert_pdf_to_jpg(pdf_dir, jpg_save_dir):
         for ppm_file in glob.glob(os.path.join(jpg_save_dir, "*.ppm")):
             os.remove(ppm_file)
 
+def main():
+    """Main function to orchestrate report downloading and processing."""
+    companyData_path = "../table_2022.csv"
+    companyName_path = resource_path('../bin/company_name_number.csv')
+
+    year = "2022"
+    download_path = "output"
+    pdf_dir = "../output/pdf/"
+    jpg_save_dir = "../output/jpg"
+
+    data, company_name = read_data(companyData_path, companyName_path)
+    data = match_and_modify_data(data, company_name)
+    download_files(data, download_path, year)
+    convert_pdf_to_jpg(pdf_dir, jpg_save_dir)
 
 if __name__ == "__main__":
     main()

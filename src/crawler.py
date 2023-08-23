@@ -15,6 +15,11 @@ from webOpen import surf
 # Constants
 CONFIG_FILE_PATH = './config.yaml'
 TABLE_PATH = None
+year = 111
+
+def set_year(year: int) -> None:
+    """Set the year to be crawled."""
+    year = year
 
 def load_config():
     """Load configuration from YAML file."""
