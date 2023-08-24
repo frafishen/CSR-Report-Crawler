@@ -8,19 +8,24 @@ Created on Fri. Aug. 22, 2023
 
 from selenium.webdriver.common.by import By
 import pandas as pd
-from webOpen import surf
+import os
 import yaml
+from webOpen import surf
 
 # Constants
 CONFIG_FILE_PATH = './config.yaml'
 TABLE_PATH = None
 
 def load_config():
-    """Load configuration from the YAML file."""
+    """Load configurations from the config file."""
+    # Determine the directory of the main.py script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the absolute path to config.yaml
+    config_path = os.path.join(script_dir, CONFIG_FILE_PATH)
     global TABLE_PATH
-    with open(CONFIG_FILE_PATH, 'r') as file:
-        config = yaml.safe_load(file)
-    TABLE_PATH = config['COMPANY']['TABLE_PATH']
+    with open(config_path, 'r') as file:
+        CONFIG = yaml.safe_load(file)
+    TABLE_PATH = os.path.join(script_dir, CONFIG['COMPANY']['TABLE_PATH'])
 
 def extract_url_from_row(row, xpaths):
     """Extract the URL from the row using the provided XPaths."""

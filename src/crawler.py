@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import pandas as pd
 import yaml
+import os
 from webOpen import surf
 
 # Constants
@@ -22,11 +23,16 @@ def set_year(year: int) -> None:
     year = year
 
 def load_config():
-    """Load configuration from YAML file."""
+    """Load configurations from the config file."""
+    # Determine the directory of the main.py script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the absolute path to config.yaml
+    config_path = os.path.join(script_dir, CONFIG_FILE_PATH)
     global TABLE_PATH
-    with open(CONFIG_FILE_PATH, 'r') as file:
-        config = yaml.safe_load(file)
-    TABLE_PATH = config['COMPANY']['TABLE_PATH']
+    with open(config_path, 'r') as file:
+        CONFIG = yaml.safe_load(file)
+    TABLE_PATH = os.path.join(script_dir, CONFIG['COMPANY']['TABLE_PATH'])
+
 
 def merge_header_cells(header_html: str) -> list[str]:
     """Merge header cells for tables with two rows of headers."""

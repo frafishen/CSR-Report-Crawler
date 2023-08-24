@@ -23,16 +23,24 @@ TABLE_PATH = None
 COMPANY_NAME = None
 PDF_DIR = None
 JPG_DIR = None
+company_name_path = None
 
 def load_config():
-    """Load configuration from the YAML file."""
-    global CONFIG, TABLE_PATH, COMPANY_NAME, PDF_DIR, JPG_DIR
-    with open(CONFIG_FILE_PATH, 'r') as file:
+    """Load configurations from the config file."""
+    # Determine the directory of the main.py script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the absolute path to config.yaml
+    config_path = os.path.join(script_dir, CONFIG_FILE_PATH)
+
+    global CONFIG, TABLE_PATH, COMPANY_NAME, PDF_DIR, JPG_DIR, company_name_path
+    with open(config_path, 'r') as file:
         CONFIG = yaml.safe_load(file)
-    TABLE_PATH = CONFIG['COMPANY']['TABLE_PATH']
-    COMPANY_NAME = CONFIG['COMPANY']['NAME_PATH']
-    PDF_DIR = CONFIG['SAVE']['PDF_DIR']
-    JPG_DIR = CONFIG['SAVE']['IMG_DIR']
+    TABLE_PATH = os.path.join(script_dir, CONFIG['COMPANY']['TABLE_PATH'])
+    COMPANY_NAME = os.path.join(script_dir, CONFIG['COMPANY']['NAME_PATH'])
+    PDF_DIR = os.path.join(script_dir, CONFIG['SAVE']['PDF_DIR'])
+    JPG_DIR = os.path.join(script_dir, CONFIG['SAVE']['IMG_DIR'])
+
+    company_name_path = os.path.join(script_dir, COMPANY_NAME)
 
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
@@ -110,7 +118,7 @@ def run(year, flag):
 
     companyData_path = f"{TABLE_PATH}table_{year}.csv"
 
-    data, company_name = read_data(companyData_path, COMPANY_NAME)
+    data, company_name = read_data(companyData_path, company_name_path)
     data = match_and_modify_data(data, company_name)
     download_files(data, PDF_DIR, year, flag)
     convert_pdf_to_jpg(PDF_DIR, JPG_DIR)

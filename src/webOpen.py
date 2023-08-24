@@ -12,6 +12,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import time
 import yaml
+import os
 
 # Constants
 CONFIG_FILE_PATH = './config.yaml'
@@ -20,10 +21,15 @@ WEB_PATH = None
 DRIVER_PATH = None
 
 def load_config():
-    """Load configuration from the YAML file."""
+    """Load configurations from the config file."""
+    # Determine the directory of the main.py script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the absolute path to config.yaml
+    config_path = os.path.join(script_dir, CONFIG_FILE_PATH)
     global CONFIG, WEB_PATH, DRIVER_PATH
-    with open(CONFIG_FILE_PATH, 'r') as file:
+    with open(config_path, 'r') as file:
         CONFIG = yaml.safe_load(file)
+    
     WEB_PATH = CONFIG['CONSTANT']['WEB_PATH']
     DRIVER_PATH = CONFIG['CONSTANT']['DRIVER_PATH']
 
