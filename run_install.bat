@@ -1,2 +1,1 @@
-@echo off
-C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ""%~dp0install_scoop.ps1""' -Verb RunAs}"
+C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& {Start-Process C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File', '%~dp0install_scoop.ps1', '%~dp0' -Verb RunAs}"
