@@ -78,7 +78,7 @@ def display_csv_buttons(csv_path):
     buttons_frame = wx.ScrolledWindow(canvas, size=(1160, 500))
     buttons_frame.SetPosition((10, 80))
     
-    with open(csv_path, 'r') as file:
+    with open(csv_path, 'r', encoding='utf-8') as file:
         reader = csv.reader(file)
         next(reader)  # Skip the first row
         headers = next(reader)
@@ -87,8 +87,9 @@ def display_csv_buttons(csv_path):
             button.Bind(wx.EVT_BUTTON, lambda evt, button_id=idx: button_clicked(button_id))
             row, col = divmod(idx, 5)
             button.SetPosition((col * 220, row * 40))
-    
+        
     buttons_frame.SetScrollbars(20, 20, len(headers) // 5 * 220, len(headers) * 40)
+
 
 
 def get_table():

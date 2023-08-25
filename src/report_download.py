@@ -15,6 +15,14 @@ import urllib.request
 from time import sleep
 from pdf2image import convert_from_path
 from tqdm import tqdm
+import ssl
+import random
+
+ssl._create_default_https_context = ssl._create_unverified_context
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:92.0) Gecko/20100101 Firefox/92.0"
+]
 
 # Constants
 CONFIG_FILE_PATH = './config.yaml'
@@ -71,13 +79,33 @@ def match_and_modify_data(data, company_name):
     data['統一編號'] = data['統一編號'].str.replace('\t', '')
     return data
 
+def download_file_with_retry(url, file_name, retries=3):
+    user_agent = random.choice(USER_AGENTS)
+    headers = {"User-Agent": user_agent}
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req) as response, open(file_name, 'wb') as out_file:
+                out_file.write(response.read())
+            break
+        except urllib.error.URLError as e:
+            wait_time = 10 * (attempt + 1)
+            print(f"Error encountered. Retrying in {wait_time} seconds...")
+            sleep(wait_time)
+        except Exception as e:
+            raise e
+    sleep(random.uniform(10, 20))
+
 def download_files(data, download_path, year, flag):
     if flag == 1:
-         for i in tqdm(range(len(data["CSR報告超連結"])), desc="Downloading reports"):
+        for i in tqdm(range(len(data["CSR報告超連結"])), desc="Downloading reports"):
             url = data["CSR報告超連結"].iloc[i]
             file_name = os.path.join(download_path, str(year) + str(data["統一編號"].iloc[i]) + ".pdf")
-            urllib.request.urlretrieve(url, file_name)
-            sleep(3)
+            
+            try:
+                download_file_with_retry(url, file_name)
+            except Exception as e:
+                print(f"Failed to download {url} due to {e}")
 
     else:
         for i in range(0,1):

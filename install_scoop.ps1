@@ -41,10 +41,10 @@ scoop install poppler
 
 # Install packages from requirements.txt using pip
 # Convert requirements.txt relative path to absolute path
-& 'C:\Scoop\apps\python\3.11.4\Scripts\pip.exe' install -r $absoluteRequirementsPath
+& "$pythonPath\Scripts\pip.exe" install -r $absoluteRequirementsPath
 
 # Run the main.py script with Python
-python $absoluteMainPath
+& "$pythonPath\python.exe" $absoluteMainPath
 
 
 
