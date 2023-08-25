@@ -17,7 +17,7 @@ Write-Host "Absolute Requirements Path: $absoluteRequirementsPath"
 Write-Host "Absolute Main Path: $absoluteMainPath"
 
 # Pause execution
-Read-Host "Press Enter to continue..."
+# Read-Host "Press Enter to continue..."
 
 # Download the Scoop installer
 Invoke-RestMethod -Uri 'get.scoop.sh' -OutFile 'install.ps1'
