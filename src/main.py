@@ -68,7 +68,7 @@ def link_clicked():
     status_text.AppendText("\nHyperlink crawling process completed.")
 
 def button_clicked(button_id):
-    clicked_buttons.append(button_id)
+    clicked_buttons.append(button_id+1)
     status_text.AppendText("\n" + ", ".join(map(str, clicked_buttons)))
 
 def display_csv_buttons(csv_path):
