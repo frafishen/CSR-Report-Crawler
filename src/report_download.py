@@ -148,6 +148,9 @@ def run(year, flag):
 
     data, company_name = read_data(companyData_path, company_name_path)
     data = match_and_modify_data(data, company_name)
+    data_copy = data.copy()
+    data_copy['統一編號'] = data_copy['統一編號'].str.extract('(\d+)')
+    data_copy.to_csv(companyData_path, encoding='utf-8', index=False)
     download_files(data, PDF_DIR, year, flag)
     convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
 

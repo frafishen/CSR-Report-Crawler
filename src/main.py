@@ -83,7 +83,12 @@ def display_csv_buttons(csv_path):
         next(reader)  # Skip the first row
         headers = next(reader)
         for idx, header in enumerate(headers):
-            button = wx.Button(buttons_frame, label=header)
+            if(idx == 11):
+                button = wx.Button(buttons_frame, label=str(2)+". "+header)
+            elif(idx == 16):
+                button = wx.Button(buttons_frame, label=str(3)+". "+header)
+            else:
+                button = wx.Button(buttons_frame, label=header)
             button.Bind(wx.EVT_BUTTON, lambda evt, button_id=idx: button_clicked(button_id))
             row, col = divmod(idx, 5)
             button.SetPosition((col * 220, row * 40))
@@ -122,13 +127,13 @@ def setup_gui():
     reset_button = wx.Button(canvas, label="Reset", pos=(300, 10))
     reset_button.Bind(wx.EVT_BUTTON, lambda evt: reset_clicked())
     
-    link_button = wx.Button(canvas, label="2. Get Link", pos=(400, 10))
+    link_button = wx.Button(canvas, label="4. Get Link", pos=(400, 10))
     link_button.Bind(wx.EVT_BUTTON, lambda evt: link_clicked())
     
-    test_button = wx.Button(canvas, label="3. Test", pos=(500, 10))
+    test_button = wx.Button(canvas, label="5. Test", pos=(500, 10))
     test_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(0))
 
-    get_all_report_button = wx.Button(canvas, label="4. Get All Report", pos=(600, 10))
+    get_all_report_button = wx.Button(canvas, label="6. Get All Report", pos=(600, 10))
     get_all_report_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(1))
 
     status_text = wx.TextCtrl(canvas, pos=(10, 350), size=(1170, 210), style=wx.TE_MULTILINE)
