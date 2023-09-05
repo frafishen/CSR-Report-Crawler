@@ -12,6 +12,7 @@ Created on Fri. Aug. 23, 2023
 import os
 import csv
 import yaml
+from datetime import datetime
 
 # Custom Modules
 import crawler
@@ -21,12 +22,15 @@ import wx
 
 # Global Variables and Constants
 CONFIG = {}
-TABLE_PATH, ROOT_PATH, PDF_DIR, JPG_DIR = '', '', '', ''
+TIMESTAMP_DIR, TABLE_PATH, ROOT_PATH, PDF_DIR, JPG_DIR = '', '', '', '', ''
 clicked_buttons = []
 
 # Functions
 
-import os
+def get_current_timestamp():
+    """Generate a timestamp in the format yymmdd_HHMM."""
+    now = datetime.now()
+    return now.strftime('%y%m%d_%H%M')
 
 def initialize_config():
     """Load configurations from the config file."""
@@ -35,14 +39,18 @@ def initialize_config():
     # Construct the absolute path to config.yaml
     config_path = os.path.join(script_dir, 'config.yaml')
     
-    global CONFIG, TABLE_PATH, ROOT_PATH, PDF_DIR, JPG_DIR
+    global CONFIG, TABLE_PATH, ROOT_PATH, PDF_DIR, JPG_DIR, TIMESTAMP_DIR
     with open(config_path, 'r') as file:
         CONFIG = yaml.safe_load(file)
 
-    TABLE_PATH = os.path.join(script_dir, CONFIG['COMPANY']['TABLE_PATH'])
-    ROOT_PATH = os.path.join(script_dir, CONFIG['SAVE']['ROOT_DIR'])
-    PDF_DIR = os.path.join(script_dir, CONFIG['SAVE']['PDF_DIR'])
-    JPG_DIR = os.path.join(script_dir, CONFIG['SAVE']['IMG_DIR'])
+    # Generate folder name based on current date and time
+    timestamp = get_current_timestamp()
+    TIMESTAMP_DIR = os.path.join(CONFIG['SAVE']['ROOT_DIR'], timestamp)
+    
+    ROOT_PATH = TIMESTAMP_DIR
+    TABLE_PATH = os.path.join(ROOT_PATH, CONFIG['COMPANY']['TABLE_PATH'])
+    PDF_DIR = os.path.join(ROOT_PATH, CONFIG['SAVE']['PDF_DIR'])
+    JPG_DIR = os.path.join(ROOT_PATH, CONFIG['SAVE']['IMG_DIR'])
 
     required_dirs = [ROOT_PATH, JPG_DIR, PDF_DIR, TABLE_PATH]
     for dir_name in required_dirs:
@@ -52,7 +60,7 @@ def initialize_config():
 def ok_clicked(flag):
     status_text.AppendText("\nOK button clicked.")
     year = int(year_entry.GetValue())
-    dl.run(year + 1911, flag)
+    dl.run(year + 1911, flag, TIMESTAMP_DIR)
     status_text.AppendText("\nDownload process completed.")
 
 def reset_clicked():
@@ -63,7 +71,7 @@ def reset_clicked():
 def link_clicked():
     status_text.AppendText("\n" + ", ".join(map(str, clicked_buttons)))
     year = int(year_entry.GetValue())
-    hc.run(year, clicked_buttons, len(clicked_buttons))
+    hc.run(year, clicked_buttons, len(clicked_buttons), TIMESTAMP_DIR)
     reset_clicked()
     status_text.AppendText("\nHyperlink crawling process completed.")
 
@@ -100,7 +108,7 @@ def display_csv_buttons(csv_path):
 def get_table():
     year = int(year_entry.GetValue())
     crawler.set_year(year)
-    crawler.run(year)
+    crawler.run(year, TIMESTAMP_DIR)
     status_text.Clear()
     status_text.AppendText(f"{len(clicked_buttons)} columns processed.")
     status_text.AppendText(f"\nData saved at {TABLE_PATH}table_{year + 1911}.csv")
@@ -135,6 +143,9 @@ def setup_gui():
 
     get_all_report_button = wx.Button(canvas, label="6. Get All Report", pos=(600, 10))
     get_all_report_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(1))
+
+    get_all_report_button = wx.Button(canvas, label="7. Get the IMG", pos=(750, 10))
+    get_all_report_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(2))
 
     status_text = wx.TextCtrl(canvas, pos=(10, 350), size=(1170, 210), style=wx.TE_MULTILINE)
 

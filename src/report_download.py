@@ -26,14 +26,11 @@ USER_AGENTS = [
 
 # Constants
 CONFIG_FILE_PATH = './config.yaml'
-CONFIG = None
-TABLE_PATH = None
-COMPANY_NAME = None
-PDF_DIR = None
-JPG_DIR = None
-company_name_path = None
+CONFIG = {}
+TIMESTAMP_DIR, TABLE_PATH, ROOT_PATH, PDF_DIR, JPG_DIR = '', '', '', '', ''
+company_name_path = ""
 
-def load_config():
+def load_config(TIMESTAMP_DIR):
     """Load configurations from the config file."""
     # Determine the directory of the main.py script
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -43,10 +40,12 @@ def load_config():
     global CONFIG, TABLE_PATH, COMPANY_NAME, PDF_DIR, JPG_DIR, company_name_path
     with open(config_path, 'r') as file:
         CONFIG = yaml.safe_load(file)
-    TABLE_PATH = os.path.join(script_dir, CONFIG['COMPANY']['TABLE_PATH'])
+    
+    ROOT_PATH = TIMESTAMP_DIR
+    TABLE_PATH = os.path.join(ROOT_PATH, CONFIG['COMPANY']['TABLE_PATH'])
     COMPANY_NAME = os.path.join(script_dir, CONFIG['COMPANY']['NAME_PATH'])
-    PDF_DIR = os.path.join(script_dir, CONFIG['SAVE']['PDF_DIR'])
-    JPG_DIR = os.path.join(script_dir, CONFIG['SAVE']['IMG_DIR'])
+    PDF_DIR = os.path.join(ROOT_PATH, CONFIG['SAVE']['PDF_DIR'])
+    JPG_DIR = os.path.join(ROOT_PATH, CONFIG['SAVE']['IMG_DIR'])
 
     company_name_path = os.path.join(script_dir, COMPANY_NAME)
 
@@ -141,18 +140,21 @@ def main():
 if __name__ == "__main__":
     main()
 
-def run(year, flag):
-    load_config()
+def run(year, flag, TIMESTAMP_DIR):
+    load_config(TIMESTAMP_DIR)
 
-    companyData_path = f"{TABLE_PATH}table_{year}.csv"
-
-    data, company_name = read_data(companyData_path, company_name_path)
-    data = match_and_modify_data(data, company_name)
-    data_copy = data.copy()
-    data_copy['統一編號'] = data_copy['統一編號'].str.extract('(\d+)')
-    data_copy.to_csv(companyData_path, encoding='utf-8', index=False)
-    download_files(data, PDF_DIR, year, flag)
-    convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
-
+    if flag == 2:
+        convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
     
+    else:
+        companyData_path = f"{TABLE_PATH}table_{year}.csv"
+
+        data, company_name = read_data(companyData_path, company_name_path)
+        data = match_and_modify_data(data, company_name)
+        data_copy = data.copy()
+        data_copy['統一編號'] = data_copy['統一編號'].str.extract('(\d+)')
+        data_copy.to_csv(companyData_path, encoding='utf-8', index=False)
+        download_files(data, PDF_DIR, year, flag)
+        if flag == 0:
+            convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
 
