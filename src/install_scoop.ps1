@@ -9,7 +9,7 @@ $batDirectory = $batDirectory.TrimEnd('\')
 
 # Now continue with your existing code
 $absoluteRequirementsPath = Join-Path -Path $batDirectory -ChildPath "src/requirements.txt"
-$absoluteMainPath = Join-Path -Path $batDirectory -ChildPath "main.py"
+$absoluteMainPath = Join-Path -Path $batDirectory -ChildPath "src/main.py"
 
 # Print the values
 Write-Host "Bat Directory: $batDirectory"
