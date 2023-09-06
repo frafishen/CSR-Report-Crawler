@@ -41,11 +41,10 @@ def load_config(TIMESTAMP_DIR):
     with open(config_path, 'r') as file:
         CONFIG = yaml.safe_load(file)
     
-    ROOT_PATH = TIMESTAMP_DIR
-    TABLE_PATH = os.path.join(ROOT_PATH, CONFIG['COMPANY']['TABLE_PATH'])
+    TABLE_PATH = os.path.join(TIMESTAMP_DIR, CONFIG['COMPANY']['TABLE_PATH'])
     COMPANY_NAME = os.path.join(script_dir, CONFIG['COMPANY']['NAME_PATH'])
-    PDF_DIR = os.path.join(ROOT_PATH, CONFIG['SAVE']['PDF_DIR'])
-    JPG_DIR = os.path.join(ROOT_PATH, CONFIG['SAVE']['IMG_DIR'])
+    PDF_DIR = os.path.join(TIMESTAMP_DIR, CONFIG['SAVE']['PDF_DIR'])
+    JPG_DIR = os.path.join(TIMESTAMP_DIR, CONFIG['SAVE']['IMG_DIR'])
 
     company_name_path = os.path.join(script_dir, COMPANY_NAME)
 

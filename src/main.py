@@ -47,14 +47,15 @@ def initialize_config():
 
     # Generate folder name based on current date and time
     timestamp = get_current_timestamp()
-    TIMESTAMP_DIR = os.path.join(CONFIG['SAVE']['ROOT_DIR'], timestamp)
+    ROOT_PATH = os.path.join(script_dir, CONFIG['SAVE']['ROOT_DIR'])
+    TIMESTAMP_DIR = os.path.join(ROOT_PATH, timestamp)
     
-    ROOT_PATH = TIMESTAMP_DIR
-    TABLE_PATH = os.path.join(ROOT_PATH, CONFIG['COMPANY']['TABLE_PATH'])
-    PDF_DIR = os.path.join(ROOT_PATH, CONFIG['SAVE']['PDF_DIR'])
-    JPG_DIR = os.path.join(ROOT_PATH, CONFIG['SAVE']['IMG_DIR'])
+    TABLE_PATH = os.path.join(TIMESTAMP_DIR, CONFIG['COMPANY']['TABLE_PATH'])
+    PDF_DIR = os.path.join(TIMESTAMP_DIR, CONFIG['SAVE']['PDF_DIR'])
+    JPG_DIR = os.path.join(TIMESTAMP_DIR, CONFIG['SAVE']['IMG_DIR'])
 
     required_dirs = [ROOT_PATH, JPG_DIR, PDF_DIR, TABLE_PATH]
+    print(required_dirs)
     for dir_name in required_dirs:
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)

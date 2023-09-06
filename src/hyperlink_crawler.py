@@ -26,8 +26,7 @@ def load_config(TIMESTAMP_DIR):
     with open(config_path, 'r') as file:
         CONFIG = yaml.safe_load(file)
     
-    ROOT_PATH = TIMESTAMP_DIR
-    TABLE_PATH = os.path.join(ROOT_PATH, CONFIG['COMPANY']['TABLE_PATH'])
+    TABLE_PATH = os.path.join(TIMESTAMP_DIR, CONFIG['COMPANY']['TABLE_PATH'])
 
 def extract_url_from_row(row, xpaths):
     """Extract the URL from the row using the provided XPaths."""
