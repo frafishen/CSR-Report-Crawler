@@ -67,12 +67,12 @@ def format_dataframe(urls, column_name):
     
     return df_urls
 
-def run(year, selected_columns, len_columns, TIMESTAMP_DIR):
+def run(year, selected_columns, len_columns, TIMESTAMP_DIR, cat_entry):
     """Main function to run the hyperlink crawler for a specific year."""
     load_config(TIMESTAMP_DIR)
     
     # Initialize the browser and extract hyperlinks
-    browser = surf(year, 5)
+    browser = surf(year, cat_entry, 5)
     urls = extract_hyperlinks_from_table(browser, selected_columns)
     browser.quit()
     

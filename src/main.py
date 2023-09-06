@@ -24,6 +24,7 @@ import wx
 CONFIG = {}
 TIMESTAMP_DIR, TABLE_PATH, ROOT_PATH, PDF_DIR, JPG_DIR = '', '', '', '', ''
 clicked_buttons = []
+cat_entry = '上市'  # Default value for the dropdown menu
 
 # Functions
 
@@ -57,6 +58,16 @@ def initialize_config():
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
 
+def on_dropdown_change(event):
+    global cat_entry
+    cat_entry = event.GetEventObject().GetStringSelection()
+
+def start_process(cat_entry):
+    year = int(year_entry.GetValue())
+    csv_path = f"{TABLE_PATH}table_{year + 1911}.csv"
+    get_table(cat_entry)
+    display_csv_buttons(csv_path)
+
 def ok_clicked(flag):
     status_text.AppendText("\nOK button clicked.")
     year = int(year_entry.GetValue())
@@ -71,7 +82,7 @@ def reset_clicked():
 def link_clicked():
     status_text.AppendText("\n" + ", ".join(map(str, clicked_buttons)))
     year = int(year_entry.GetValue())
-    hc.run(year, clicked_buttons, len(clicked_buttons), TIMESTAMP_DIR)
+    hc.run(year, clicked_buttons, len(clicked_buttons), TIMESTAMP_DIR, cat_entry)
     reset_clicked()
     status_text.AppendText("\nHyperlink crawling process completed.")
 
@@ -105,19 +116,13 @@ def display_csv_buttons(csv_path):
 
 
 
-def get_table():
+def get_table(cat_entry):
     year = int(year_entry.GetValue())
     crawler.set_year(year)
-    crawler.run(year, TIMESTAMP_DIR)
+    crawler.run(year, TIMESTAMP_DIR, cat_entry)
     status_text.Clear()
     status_text.AppendText(f"{len(clicked_buttons)} columns processed.")
     status_text.AppendText(f"\nData saved at {TABLE_PATH}table_{year + 1911}.csv")
-
-def start_process():
-    year = int(year_entry.GetValue())
-    csv_path = f"{TABLE_PATH}table_{year + 1911}.csv"
-    get_table()
-    display_csv_buttons(csv_path)
 
 def setup_gui():
     global year_entry, status_text, canvas
@@ -128,23 +133,31 @@ def setup_gui():
     
     year_label = wx.StaticText(canvas, label="Year:", pos=(10, 10))
     year_entry = wx.TextCtrl(canvas, pos=(60, 10), size=(100, -1))
+    choices = ['上市', '上櫃', '興櫃', '公開發行']
+    dropdown = wx.ComboBox(canvas, pos=(170, 10), choices=choices, style=wx.CB_READONLY)
+    dropdown.SetSelection(0)
+    dropdown.Bind(wx.EVT_COMBOBOX, lambda evt: on_dropdown_change(evt))
+
+    def start_button_handler(evt):
+        selected_value = dropdown.GetStringSelection()
+        start_process(selected_value)
     
-    start_process_button = wx.Button(canvas, label="1. Start Process!", pos=(170, 10))
-    start_process_button.Bind(wx.EVT_BUTTON, lambda evt: start_process())
+    start_process_button = wx.Button(canvas, label="1. Start Process!", pos=(300, 10))
+    start_process_button.Bind(wx.EVT_BUTTON, start_button_handler)
     
-    reset_button = wx.Button(canvas, label="Reset", pos=(300, 10))
+    reset_button = wx.Button(canvas, label="Reset", pos=(450, 10))
     reset_button.Bind(wx.EVT_BUTTON, lambda evt: reset_clicked())
     
-    link_button = wx.Button(canvas, label="4. Get Link", pos=(400, 10))
+    link_button = wx.Button(canvas, label="4. Get Link", pos=(550, 10))
     link_button.Bind(wx.EVT_BUTTON, lambda evt: link_clicked())
     
-    test_button = wx.Button(canvas, label="5. Test", pos=(500, 10))
+    test_button = wx.Button(canvas, label="5. Test", pos=(650, 10))
     test_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(0))
 
-    get_all_report_button = wx.Button(canvas, label="6. Get All Report", pos=(600, 10))
+    get_all_report_button = wx.Button(canvas, label="6. Get All Report", pos=(750, 10))
     get_all_report_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(1))
 
-    get_all_report_button = wx.Button(canvas, label="7. Get the IMG", pos=(750, 10))
+    get_all_report_button = wx.Button(canvas, label="7. Get the IMG", pos=(900, 10))
     get_all_report_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(2))
 
     status_text = wx.TextCtrl(canvas, pos=(10, 350), size=(1170, 210), style=wx.TE_MULTILINE)

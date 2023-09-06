@@ -61,7 +61,6 @@ def read_data(company_data_path, company_name_path):
     new_header = data.iloc[0]
     data = data[1:]
     data.columns = new_header
-
     company_name = pd.read_csv(company_name_path, encoding='utf-8')
     return data, company_name
 
@@ -147,12 +146,14 @@ def run(year, flag, TIMESTAMP_DIR):
         convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
     
     else:
-        companyData_path = f"{TABLE_PATH}table_{year}.csv"
+        companyData_path_csv = f"{TABLE_PATH}table_{year}.csv"
+        companyData_path_excel = f"{TABLE_PATH}table_{year}..xlsx"
 
-        data, company_name = read_data(companyData_path, company_name_path)
+        data, company_name = read_data(companyData_path_csv, company_name_path)
         data = match_and_modify_data(data, company_name)
         data_copy = data.copy()
-        data_copy.to_csv(companyData_path, encoding='utf-8', index=False)
+        data_copy.to_csv(companyData_path_csv, encoding='utf-8', index=False)
+        data_copy.to_excel(companyData_path_excel, index=False)
         download_files(data, PDF_DIR, year, flag)
         if flag == 0:
             convert_pdf_to_jpg(PDF_DIR, JPG_DIR)

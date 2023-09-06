@@ -81,17 +81,17 @@ def extract_table_data(browser, year: int) -> pd.DataFrame:
     combined_df = pd.concat([header_df, df_rows], axis=0, ignore_index=True)
     return combined_df
 
-def get_table_for_year(year: int) -> pd.DataFrame:
+def get_table_for_year(year: int, cat_entry: str) -> pd.DataFrame:
     """Get table data for a specific year."""
-    browser = surf(year, 10)
+    browser = surf(year, cat_entry, 10)
     data_frame = extract_table_data(browser, year)
     browser.quit()
     return data_frame
 
-def run(year: int, TIMESTAMP_DIR: str) -> int:
+def run(year: int, TIMESTAMP_DIR: str, cat_entry: str) -> int:
     """Main function to run the crawler for a specific year."""
     load_config(TIMESTAMP_DIR)
-    result = get_table_for_year(year)
+    result = get_table_for_year(year, cat_entry)
     result.to_csv(f"{TABLE_PATH}table_{year+1911}.csv", encoding='utf-8', index=False)
     return result.shape[1]
 
