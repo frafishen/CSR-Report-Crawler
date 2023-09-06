@@ -14,9 +14,9 @@ from webOpen import surf
 
 # Constants
 CONFIG_FILE_PATH = './config.yaml'
-TIMESTAMP_DIR, ROOT_PATH, TABLE_PATH = '', '', ''
+TIMESTAMP_DIR, ROOT_PATH, TABLE_PATH, cat_entry = '', '', '', ''
 
-def load_config(TIMESTAMP_DIR):
+def load_config(TIMESTAMP_DIR, cat_entry):
     """Load configurations from the config file."""
     # Determine the directory of the main.py script
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,7 +26,7 @@ def load_config(TIMESTAMP_DIR):
     with open(config_path, 'r') as file:
         CONFIG = yaml.safe_load(file)
     
-    TABLE_PATH = os.path.join(TIMESTAMP_DIR, CONFIG['COMPANY']['TABLE_PATH'])
+    TABLE_PATH = os.path.join(TIMESTAMP_DIR, cat_entry, CONFIG['COMPANY']['TABLE_PATH'])
 
 def extract_url_from_row(row, xpaths):
     """Extract the URL from the row using the provided XPaths."""
@@ -68,7 +68,7 @@ def format_dataframe(urls, column_name):
 
 def run(year, selected_columns, len_columns, TIMESTAMP_DIR, cat_entry):
     """Main function to run the hyperlink crawler for a specific year."""
-    load_config(TIMESTAMP_DIR)
+    load_config(TIMESTAMP_DIR, cat_entry)
     
     # Initialize the browser and extract hyperlinks
     browser = surf(year, cat_entry, 5)

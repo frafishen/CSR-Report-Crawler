@@ -15,14 +15,14 @@ from webOpen import surf
 
 # Constants
 CONFIG_FILE_PATH = './config.yaml'
-TIMESTAMP_DIR, ROOT_PATH, TABLE_PATH = '', '', ''
+TIMESTAMP_DIR, ROOT_PATH, TABLE_PATH, cat_entry = '', '', '', ''
 year = 111
 
 def set_year(year: int) -> None:
     """Set the year to be crawled."""
     year = year
 
-def load_config(TIMESTAMP_DIR):
+def load_config(TIMESTAMP_DIR, cat_entry):
     """Load configurations from the config file."""
     # Determine the directory of the main.py script
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -32,7 +32,7 @@ def load_config(TIMESTAMP_DIR):
     with open(config_path, 'r') as file:
         CONFIG = yaml.safe_load(file)
     
-    TABLE_PATH = os.path.join(TIMESTAMP_DIR, CONFIG['COMPANY']['TABLE_PATH'])
+    TABLE_PATH = os.path.join(TIMESTAMP_DIR, cat_entry, CONFIG['COMPANY']['TABLE_PATH'])
 
 def merge_header_cells(header_html: str) -> list[str]:
     """Merge header cells for tables with two rows of headers."""
@@ -89,7 +89,7 @@ def get_table_for_year(year: int, cat_entry: str) -> pd.DataFrame:
 
 def run(year: int, TIMESTAMP_DIR: str, cat_entry: str) -> int:
     """Main function to run the crawler for a specific year."""
-    load_config(TIMESTAMP_DIR)
+    load_config(TIMESTAMP_DIR, cat_entry)
     result = get_table_for_year(year, cat_entry)
     result.to_csv(f"{TABLE_PATH}table_{year+1911}.csv", encoding='utf-8', index=False)
     return result.shape[1]

@@ -14,12 +14,12 @@ import csv
 import yaml
 from datetime import datetime
 import sys
+import wx
 
 # Custom Modules
 import crawler
 import hyperlink_crawler as hc
 import report_download as dl
-import wx
 
 # Global Variables and Constants
 CONFIG = {}
@@ -50,15 +50,19 @@ def initialize_config():
     ROOT_PATH = os.path.join(script_dir, CONFIG['SAVE']['ROOT_DIR'])
     TIMESTAMP_DIR = os.path.join(ROOT_PATH, timestamp)
     
-    TABLE_PATH = os.path.join(TIMESTAMP_DIR, CONFIG['COMPANY']['TABLE_PATH'])
-    PDF_DIR = os.path.join(TIMESTAMP_DIR, CONFIG['SAVE']['PDF_DIR'])
-    JPG_DIR = os.path.join(TIMESTAMP_DIR, CONFIG['SAVE']['IMG_DIR'])
+    TABLE_PATH = os.path.join(TIMESTAMP_DIR, cat_entry, CONFIG['COMPANY']['TABLE_PATH'])
+    PDF_DIR = os.path.join(TIMESTAMP_DIR, cat_entry, CONFIG['SAVE']['PDF_DIR'])
+    JPG_DIR = os.path.join(TIMESTAMP_DIR, cat_entry, CONFIG['SAVE']['IMG_DIR'])
 
     required_dirs = [ROOT_PATH, JPG_DIR, PDF_DIR, TABLE_PATH]
     print(required_dirs)
     for dir_name in required_dirs:
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
+
+def create_folders(event):
+    """Create the necessary folders for saving the data."""
+    initialize_config()
 
 def on_dropdown_change(event):
     global cat_entry
@@ -73,7 +77,7 @@ def start_process(cat_entry):
 def ok_clicked(flag):
     status_text.AppendText("\nOK button clicked.")
     year = int(year_entry.GetValue())
-    dl.run(year + 1911, flag, TIMESTAMP_DIR)
+    dl.run(year + 1911, flag, TIMESTAMP_DIR, cat_entry)
     status_text.AppendText("\nDownload process completed.")
 
 def reset_clicked():
@@ -144,22 +148,25 @@ def setup_gui():
         selected_value = dropdown.GetStringSelection()
         start_process(selected_value)
     
-    start_process_button = wx.Button(canvas, label="1. Start Process!", pos=(300, 10))
+    check_setting_button = wx.Button(canvas, wx.ID_ANY, "0. Create Folders", pos=(300, 10))
+    check_setting_button.Bind(wx.EVT_BUTTON, create_folders)
+
+    start_process_button = wx.Button(canvas, label="1. Start Process!", pos=(430, 10))
     start_process_button.Bind(wx.EVT_BUTTON, start_button_handler)
     
-    reset_button = wx.Button(canvas, label="Reset", pos=(450, 10))
+    reset_button = wx.Button(canvas, label="Reset", pos=(560, 10))
     reset_button.Bind(wx.EVT_BUTTON, lambda evt: reset_clicked())
     
-    link_button = wx.Button(canvas, label="4. Get Link", pos=(550, 10))
+    link_button = wx.Button(canvas, label="4. Get Link", pos=(650, 10))
     link_button.Bind(wx.EVT_BUTTON, lambda evt: link_clicked())
     
-    test_button = wx.Button(canvas, label="5. Test", pos=(650, 10))
+    test_button = wx.Button(canvas, label="5. Test", pos=(750, 10))
     test_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(0))
 
-    get_all_report_button = wx.Button(canvas, label="6. Get All Report", pos=(750, 10))
+    get_all_report_button = wx.Button(canvas, label="6. Get All Report", pos=(850, 10))
     get_all_report_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(1))
 
-    get_all_report_button = wx.Button(canvas, label="7. Get the IMG", pos=(900, 10))
+    get_all_report_button = wx.Button(canvas, label="7. Get the IMG", pos=(1000, 10))
     get_all_report_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(2))
 
     status_text = wx.TextCtrl(canvas, pos=(10, 350), size=(1170, 210), style=wx.TE_MULTILINE)
@@ -175,6 +182,5 @@ if __name__ == "__main__":
     else:
         base_directory = os.path.dirname(os.path.abspath(__file__))
         
-    initialize_config()
     # Ensure necessary directories exist
     setup_gui()

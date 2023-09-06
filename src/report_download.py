@@ -27,10 +27,10 @@ USER_AGENTS = [
 # Constants
 CONFIG_FILE_PATH = './config.yaml'
 CONFIG = {}
-TIMESTAMP_DIR, TABLE_PATH, ROOT_PATH, PDF_DIR, JPG_DIR = '', '', '', '', ''
+TIMESTAMP_DIR, TABLE_PATH, ROOT_PATH, PDF_DIR, JPG_DIR, cat_entry = '', '', '', '', '', ''
 company_name_path = ""
 
-def load_config(TIMESTAMP_DIR):
+def load_config(TIMESTAMP_DIR, cat_entry):
     """Load configurations from the config file."""
     # Determine the directory of the main.py script
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -41,10 +41,10 @@ def load_config(TIMESTAMP_DIR):
     with open(config_path, 'r') as file:
         CONFIG = yaml.safe_load(file)
     
-    TABLE_PATH = os.path.join(TIMESTAMP_DIR, CONFIG['COMPANY']['TABLE_PATH'])
+    TABLE_PATH = os.path.join(TIMESTAMP_DIR, cat_entry, CONFIG['COMPANY']['TABLE_PATH'])
     COMPANY_NAME = os.path.join(script_dir, CONFIG['COMPANY']['NAME_PATH'])
-    PDF_DIR = os.path.join(TIMESTAMP_DIR, CONFIG['SAVE']['PDF_DIR'])
-    JPG_DIR = os.path.join(TIMESTAMP_DIR, CONFIG['SAVE']['IMG_DIR'])
+    PDF_DIR = os.path.join(TIMESTAMP_DIR, cat_entry, CONFIG['SAVE']['PDF_DIR'])
+    JPG_DIR = os.path.join(TIMESTAMP_DIR, cat_entry, CONFIG['SAVE']['IMG_DIR'])
 
     company_name_path = os.path.join(script_dir, COMPANY_NAME)
 
@@ -138,8 +138,8 @@ def main():
 if __name__ == "__main__":
     main()
 
-def run(year, flag, TIMESTAMP_DIR):
-    load_config(TIMESTAMP_DIR)
+def run(year, flag, TIMESTAMP_DIR, cat_entry):
+    load_config(TIMESTAMP_DIR, cat_entry)
 
     if flag == 2:
         convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
