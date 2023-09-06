@@ -13,6 +13,7 @@ import os
 import csv
 import yaml
 from datetime import datetime
+import sys
 
 # Custom Modules
 import crawler
@@ -168,6 +169,11 @@ def setup_gui():
 
 # Main Execution
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        base_directory = sys.argv[1]
+    else:
+        base_directory = os.path.dirname(os.path.abspath(__file__))
+        
     initialize_config()
     # Ensure necessary directories exist
     setup_gui()
