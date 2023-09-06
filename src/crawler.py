@@ -32,8 +32,7 @@ def load_config(TIMESTAMP_DIR):
     with open(config_path, 'r') as file:
         CONFIG = yaml.safe_load(file)
     
-    ROOT_PATH = TIMESTAMP_DIR
-    TABLE_PATH = os.path.join(ROOT_PATH, CONFIG['COMPANY']['TABLE_PATH'])
+    TABLE_PATH = os.path.join(TIMESTAMP_DIR, CONFIG['COMPANY']['TABLE_PATH'])
 
 def merge_header_cells(header_html: str) -> list[str]:
     """Merge header cells for tables with two rows of headers."""
