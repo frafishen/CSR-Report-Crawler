@@ -37,7 +37,7 @@ def load_config(prefix_path):
     # Construct the absolute path to config.yaml
     config_path = os.path.join(script_dir, CONFIG_FILE_PATH)
 
-    global CONFIG, TABLE_PATH, COMPANY_NAME, PDF_DIR, JPG_DIR, company_name_path
+    global CONFIG, TABLE_PATH, COMPANY_NAME, PDF_DIR, JPG_DIR, ROOT_PATH, company_name_path
     with open(config_path, 'r') as file:
         CONFIG = yaml.safe_load(file)
     
@@ -45,6 +45,7 @@ def load_config(prefix_path):
     COMPANY_NAME = os.path.join(script_dir, CONFIG['COMPANY']['NAME_PATH'])
     PDF_DIR = os.path.join(prefix_path, CONFIG['SAVE']['PDF_DIR'])
     JPG_DIR = os.path.join(prefix_path, CONFIG['SAVE']['IMG_DIR'])
+    ROOT_PATH = os.path.join(script_dir, CONFIG['SAVE']['ROOT_DIR'])
 
     company_name_path = os.path.join(script_dir, COMPANY_NAME)
 
@@ -62,7 +63,6 @@ def read_data(company_data_path, company_name_path):
     data.columns = new_header
     company_name = pd.read_csv(company_name_path, encoding='utf-8')
     return data, company_name
-
 
 def match_and_modify_data(data, company_name):
     """Match and modify data using company names."""
@@ -93,7 +93,10 @@ def download_file_with_retry(url, file_name, retries=3):
             raise e
     sleep(random.uniform(10, 20))
 
-def download_files(data, download_path, year, flag):
+def download_files(data, download_path, year, flag, new_company_list):
+    data = data[data['公司完整名稱'].isin(new_company_list)]  # Filter data based on company_list
+    print("待下載之更新公司名單")
+    print(data['公司完整名稱'])
     if flag == 1:
         for i in tqdm(range(len(data["CSR報告超連結"])), desc="Downloading reports"):
             url = data["CSR報告超連結"].iloc[i]
@@ -112,7 +115,7 @@ def download_files(data, download_path, year, flag):
             sleep(3)
 
 def convert_pdf_to_jpg(pdf_dir, jpg_save_dir):
-    for pdf_file in glob.glob(os.path.join(pdf_dir, "*.pdf")):
+    for pdf_file in tqdm(glob.glob(os.path.join(pdf_dir, "*.pdf")), desc = "Download Covers"):
         images_from_path = convert_from_path(pdf_file, output_folder=jpg_save_dir, last_page=1, first_page=0)
         base_filename = os.path.splitext(os.path.basename(pdf_file))[0] + '.jpg'
         for page in images_from_path:
@@ -138,7 +141,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-def run(year, flag, prefix_path):
+def run(year, flag, cat_entry, prefix_path):
     load_config(prefix_path)
 
     if flag == 2:
@@ -153,7 +156,50 @@ def run(year, flag, prefix_path):
         data_copy = data.copy()
         data_copy.to_csv(companyData_path_csv, encoding='utf-8', index=False)
         data_copy.to_excel(companyData_path_excel, index=False)
-        download_files(data, PDF_DIR, year, flag)
+        new_company_list = get_new_companies(cat_entry, year)
+        download_files(data, PDF_DIR, year, flag, new_company_list)
         if flag == 0:
             convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
 
+def get_latest_directory(cat_entry):
+    """
+    Get the latest directory for a given category based on the naming format "YYMMDD_HHMM_{cat}".
+    """
+    pattern = os.path.join(ROOT_PATH, f"*_{cat_entry}")
+    directories = sorted(glob.glob(pattern), key=os.path.getmtime, reverse=True)
+    if len(directories) >= 2:
+        return directories[0], directories[1]
+    if directories:
+        return directories[0], None
+    else:
+        return None, None
+
+def get_latest_two_tables(cat_entry, year):
+    """
+    Get the paths of the latest two tables of the specified category and year.
+    """
+    # Construct the pattern of the tables based on the given category and year
+    base_directory = get_latest_directory(cat_entry)
+    print(f"近兩期{cat_entry}公司下載項目")
+    print(base_directory)
+    if len(base_directory) == 2:
+        lat_path = os.path.join(base_directory[0], f"table/table_{year}.csv")
+        pre_path = os.path.join(base_directory[1], f"table/table_{year}.csv")
+        return lat_path,  pre_path
+    elif len(base_directory) == 1:
+        path = os.path.join(base_directory[0], f"table/table_{year}.csv")
+        return path, None        
+    else:
+        return None, None
+    
+def get_new_companies(cat_entry, year):
+    """Compare the latest table with the previous version and return a list of new or updated companies."""
+    latest_table_path, previous_table_path = get_latest_two_tables(cat_entry, year)
+    # print(latest_table_path, previous_table_path)
+    if not previous_table_path:
+        latest_table = pd.read_csv(latest_table_path)
+        return latest_table["公司完整名稱"].tolist()
+    latest_table = pd.read_csv(latest_table_path)
+    previous_table = pd.read_csv(previous_table_path)
+    new_companies = set(latest_table["公司完整名稱"]) - set(previous_table["公司完整名稱"])
+    return list(new_companies)

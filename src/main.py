@@ -56,6 +56,7 @@ def initialize_config():
     JPG_DIR = os.path.join(prefix_path, CONFIG['SAVE']['IMG_DIR'])
 
     required_dirs = [ROOT_PATH, JPG_DIR, PDF_DIR, TABLE_PATH]
+    print("建立資料夾名稱")
     print(required_dirs)
     for dir_name in required_dirs:
         if not os.path.exists(dir_name):
@@ -79,7 +80,7 @@ def start_process(cat_entry):
 def ok_clicked(flag):
     status_text.AppendText("\nOK button clicked.")
     year = int(year_entry.GetValue())
-    dl.run(year + 1911, flag, prefix_path)
+    dl.run(year + 1911, flag, cat_entry, prefix_path)
     status_text.AppendText("\nDownload process completed.")
 
 def reset_clicked():
