@@ -17,6 +17,7 @@ from pdf2image import convert_from_path
 from tqdm import tqdm
 import ssl
 import random
+import http.client
 
 ssl._create_default_https_context = ssl._create_unverified_context
 USER_AGENTS = [
@@ -97,11 +98,11 @@ def get_latest_two_tables(cat_entry, year):
     base_directory = get_latest_directory(cat_entry)
     print(f"近兩期{cat_entry}公司下載項目")
     print(base_directory)
-    if len(base_directory) == 2:
+    if base_directory[1]:
         lat_path = os.path.join(base_directory[0], f"table/table_{year}.csv")
         pre_path = os.path.join(base_directory[1], f"table/table_{year}.csv")
         return lat_path,  pre_path
-    elif len(base_directory) == 1:
+    elif base_directory[0]:
         path = os.path.join(base_directory[0], f"table/table_{year}.csv")
         return path, None        
     else:
@@ -129,11 +130,12 @@ def download_file_with_retry(url, file_name, retries=3):
             with urllib.request.urlopen(req) as response, open(file_name, 'wb') as out_file:
                 out_file.write(response.read())
             break
-        except urllib.error.URLError as e:
-            wait_time = 10 * (attempt + 1)
+        except (urllib.error.URLError, http.client.RemoteDisconnected) as e:
+            wait_time = (2 ** attempt) + random.uniform(0, 1)
             print(f"Error encountered. Retrying in {wait_time} seconds...")
             sleep(wait_time)
         except Exception as e:
+            print(f"Attempt {attempt + 1} of {retries} failed with error: {e}. Retrying in {wait_time} seconds...")
             raise e
     sleep(random.uniform(10, 20))
 
@@ -141,6 +143,9 @@ def download_files(data, download_path, year, flag, new_company_list):
     data = data[data['公司完整名稱'].isin(new_company_list)]  # Filter data based on company_list
     print("待下載之更新公司名單")
     print(data['公司完整名稱'])
+    if len(data) == 0:
+        print("No new companies to download.")
+        return
     if flag == 1:
         for i in tqdm(range(len(data["CSR報告超連結"])), desc="Downloading reports"):
             url = data["CSR報告超連結"].iloc[i]
@@ -202,5 +207,4 @@ def run(year, flag, cat_entry, prefix_path):
         data_copy.to_excel(companyData_path_excel, index=False)
         new_company_list = get_new_companies(cat_entry, year)
         download_files(data, PDF_DIR, year, flag, new_company_list)
-        if flag == 0:
-            convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
+        convert_pdf_to_jpg(PDF_DIR, JPG_DIR)

@@ -162,15 +162,9 @@ def setup_gui():
     
     link_button = wx.Button(canvas, label="4. Get Link", pos=(650, 10))
     link_button.Bind(wx.EVT_BUTTON, lambda evt: link_clicked())
-    
-    test_button = wx.Button(canvas, label="5. Test", pos=(750, 10))
-    test_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(0))
 
-    get_all_report_button = wx.Button(canvas, label="6. Get All Report", pos=(850, 10))
+    get_all_report_button = wx.Button(canvas, label="5. Get All Report and Covers", pos=(750, 10))
     get_all_report_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(1))
-
-    get_all_report_button = wx.Button(canvas, label="7. Get the IMG", pos=(1000, 10))
-    get_all_report_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(2))
 
     status_text = wx.TextCtrl(canvas, pos=(10, 350), size=(1170, 210), style=wx.TE_MULTILINE)
 
