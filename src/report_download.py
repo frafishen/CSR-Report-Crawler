@@ -76,6 +76,50 @@ def match_and_modify_data(data, company_name):
     data['統一編號'] = data['統一編號'].str.replace('\t', '')
     return data
 
+def get_latest_directory(cat_entry):
+    """
+    Get the latest directory for a given category based on the naming format "YYMMDD_HHMM_{cat}".
+    """
+    pattern = os.path.join(ROOT_PATH, f"*_{cat_entry}")
+    directories = sorted(glob.glob(pattern), key=os.path.getmtime, reverse=True)
+    if len(directories) >= 2:
+        return directories[0], directories[1]
+    if directories:
+        return directories[0], None
+    else:
+        return None, None
+
+def get_latest_two_tables(cat_entry, year):
+    """
+    Get the paths of the latest two tables of the specified category and year.
+    """
+    # Construct the pattern of the tables based on the given category and year
+    base_directory = get_latest_directory(cat_entry)
+    print(f"近兩期{cat_entry}公司下載項目")
+    print(base_directory)
+    if len(base_directory) == 2:
+        lat_path = os.path.join(base_directory[0], f"table/table_{year}.csv")
+        pre_path = os.path.join(base_directory[1], f"table/table_{year}.csv")
+        return lat_path,  pre_path
+    elif len(base_directory) == 1:
+        path = os.path.join(base_directory[0], f"table/table_{year}.csv")
+        return path, None        
+    else:
+        return None, None
+    
+def get_new_companies(cat_entry, year):
+    """Compare the latest table with the previous version and return a list of new or updated companies."""
+    latest_table_path, previous_table_path = get_latest_two_tables(cat_entry, year)
+    # print(latest_table_path, previous_table_path)
+    if not previous_table_path:
+        latest_table = pd.read_csv(latest_table_path)
+        return latest_table["公司完整名稱"].tolist()
+    latest_table = pd.read_csv(latest_table_path)
+    previous_table = pd.read_csv(previous_table_path)
+    new_companies = set(latest_table["公司完整名稱"]) - set(previous_table["公司完整名稱"])
+    return list(new_companies)
+
+
 def download_file_with_retry(url, file_name, retries=3):
     user_agent = random.choice(USER_AGENTS)
     headers = {"User-Agent": user_agent}
@@ -160,46 +204,3 @@ def run(year, flag, cat_entry, prefix_path):
         download_files(data, PDF_DIR, year, flag, new_company_list)
         if flag == 0:
             convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
-
-def get_latest_directory(cat_entry):
-    """
-    Get the latest directory for a given category based on the naming format "YYMMDD_HHMM_{cat}".
-    """
-    pattern = os.path.join(ROOT_PATH, f"*_{cat_entry}")
-    directories = sorted(glob.glob(pattern), key=os.path.getmtime, reverse=True)
-    if len(directories) >= 2:
-        return directories[0], directories[1]
-    if directories:
-        return directories[0], None
-    else:
-        return None, None
-
-def get_latest_two_tables(cat_entry, year):
-    """
-    Get the paths of the latest two tables of the specified category and year.
-    """
-    # Construct the pattern of the tables based on the given category and year
-    base_directory = get_latest_directory(cat_entry)
-    print(f"近兩期{cat_entry}公司下載項目")
-    print(base_directory)
-    if len(base_directory) == 2:
-        lat_path = os.path.join(base_directory[0], f"table/table_{year}.csv")
-        pre_path = os.path.join(base_directory[1], f"table/table_{year}.csv")
-        return lat_path,  pre_path
-    elif len(base_directory) == 1:
-        path = os.path.join(base_directory[0], f"table/table_{year}.csv")
-        return path, None        
-    else:
-        return None, None
-    
-def get_new_companies(cat_entry, year):
-    """Compare the latest table with the previous version and return a list of new or updated companies."""
-    latest_table_path, previous_table_path = get_latest_two_tables(cat_entry, year)
-    # print(latest_table_path, previous_table_path)
-    if not previous_table_path:
-        latest_table = pd.read_csv(latest_table_path)
-        return latest_table["公司完整名稱"].tolist()
-    latest_table = pd.read_csv(latest_table_path)
-    previous_table = pd.read_csv(previous_table_path)
-    new_companies = set(latest_table["公司完整名稱"]) - set(previous_table["公司完整名稱"])
-    return list(new_companies)

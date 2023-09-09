@@ -11,6 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 import yaml
 import os
@@ -41,16 +42,15 @@ def load_config(cat_entry):
         CONFIG = yaml.safe_load(file)
     
     WEB_PATH = CONFIG['CONSTANT']['WEB_PATH']
-    DRIVER_PATH = CONFIG['CONSTANT']['DRIVER_PATH']
+    # DRIVER_PATH = CONFIG['CONSTANT']['DRIVER_PATH']
     cat_id = choices_mapping[cat_entry]
 
 def surf(year, cat_entry, sec):
     """Open a web page using Selenium, input the given year, and perform a search."""
     load_config(cat_entry)
     chrome_options = Options()
-    chrome_options.executable_path = DRIVER_PATH
+    chrome_options.executable_path = ChromeDriverManager().install()
     browser = webdriver.Chrome(options=chrome_options)
-
     browser.get(WEB_PATH)
 
     # Select the dropdown based on cat_id
