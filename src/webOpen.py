@@ -49,6 +49,7 @@ def surf(year, cat_entry, sec):
     """Open a web page using Selenium, input the given year, and perform a search."""
     load_config(cat_entry)
     chrome_options = Options()
+    # chrome_options.executable_path = DRIVER_PATH
     chrome_options.executable_path = ChromeDriverManager().install()
     browser = webdriver.Chrome(options=chrome_options)
     browser.get(WEB_PATH)
