@@ -133,6 +133,13 @@ def get_table(cat_entry):
     status_text.AppendText(f"{len(clicked_buttons)} columns processed.")
     status_text.AppendText(f"\nData saved at {TABLE_PATH}table_{year + 1911}.csv")
 
+def recheck(recheck_entry):
+    recheck_folder = str(recheck_entry.GetValue())
+    year = int(year_entry.GetValue())
+    status_text.AppendText(f"\nrecheck folder: {recheck_folder}")
+    dl.run_recheck(year+1911, recheck_folder)
+    status_text.AppendText(f"\ncomplete recheck")
+
 def setup_gui():
     global year_entry, status_text, canvas
 
@@ -165,6 +172,11 @@ def setup_gui():
 
     get_all_report_button = wx.Button(canvas, label="5. Get All Report and Covers", pos=(750, 10))
     get_all_report_button.Bind(wx.EVT_BUTTON, lambda evt: ok_clicked(1))
+
+    recheck_label = wx.StaticText(canvas, label="recheck foloder name:", pos=(1000, 10))
+    reckeck_entry = wx.TextCtrl(canvas, pos=(980, 30), size=(100, -1))
+    recheck_button = wx.Button(canvas, label="recheck", pos=(1100, 30))
+    recheck_button.Bind(wx.EVT_BUTTON, lambda evt: recheck(reckeck_entry))
 
     status_text = wx.TextCtrl(canvas, pos=(10, 350), size=(1170, 210), style=wx.TE_MULTILINE)
 

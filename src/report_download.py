@@ -10,6 +10,7 @@ import os
 import sys
 import glob
 import yaml
+import re
 import pandas as pd
 import urllib.request
 from time import sleep
@@ -172,6 +173,48 @@ def convert_pdf_to_jpg(pdf_dir, jpg_save_dir):
         for ppm_file in glob.glob(os.path.join(jpg_save_dir, "*.ppm")):
             os.remove(ppm_file)
 
+def extract_numbers_from_filenames(folder_path):
+    # List all files in the given directory
+    files = os.listdir(folder_path)
+    
+    # Define a regex pattern to extract number from the filename
+    pattern = re.compile(r'\d{4}_(\d+)')
+    
+    # Extract numbers and store in a list with underscore prefix
+    numbers = []
+    for filename in files:
+        match = pattern.match(filename)
+        if match:
+            numbers.append("_" + match.group(1))
+    
+    return numbers
+
+def recheck(data, PDF_DIR):
+    # Check whether the downloaded files are corrupted or not by checking their md5sum values and delete them when they're corrupted
+    print('rechecking...')
+    existed_report_numbers = extract_numbers_from_filenames(PDF_DIR)
+    expected_report_numbers = data["統一編號"]
+
+    redownload_list = []
+    for report_number in expected_report_numbers:
+        if report_number not in existed_report_numbers:
+            redownload_list.append(report_number)
+
+    print(len(redownload_list))
+        
+    return redownload_list
+
+def run_recheck(year, recheck_folder):
+    recheck_pdf_path = f"../output/{recheck_folder}/pdf"
+    recheck_table_path = f"../output/{recheck_folder}/table/table_{year}.csv"
+
+    data = pd.read_csv(recheck_table_path, encoding='utf-8', header=0)
+    for i in range(5):
+        redownload_number_list = recheck(data, recheck_pdf_path)
+        redownload_company_list = data[data["統一編號"].isin(redownload_number_list)]["公司完整名稱"]
+        download_files(data, recheck_pdf_path, year, 1, redownload_company_list)
+
+
 def main():
     """Main function to orchestrate report downloading and processing."""
     companyData_path = "../table_2022.csv"
@@ -198,7 +241,7 @@ def run(year, flag, cat_entry, prefix_path):
     
     else:
         companyData_path_csv = f"{TABLE_PATH}table_{year}.csv"
-        companyData_path_excel = f"{TABLE_PATH}table_{year}..xlsx"
+        companyData_path_excel = f"{TABLE_PATH}table_{year}.xlsx"
 
         data, company_name = read_data(companyData_path_csv, company_name_path)
         data = match_and_modify_data(data, company_name)
@@ -207,4 +250,10 @@ def run(year, flag, cat_entry, prefix_path):
         data_copy.to_excel(companyData_path_excel, index=False)
         new_company_list = get_new_companies(cat_entry, year)
         download_files(data, PDF_DIR, year, flag, new_company_list)
+        
+        # Check whether the downloaded files are corrupted or not by checking their md5sum values and delete them when they're corrupted
+        for i in range(5):
+            redownload_list = recheck(data, PDF_DIR)
+            download_files(data, PDF_DIR, year, flag, redownload_list)
+
         convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
