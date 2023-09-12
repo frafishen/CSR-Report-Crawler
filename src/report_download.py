@@ -205,14 +205,17 @@ def recheck(data, PDF_DIR):
     return redownload_list
 
 def run_recheck(year, recheck_folder):
-    recheck_pdf_path = f"../output/{recheck_folder}/pdf"
-    recheck_table_path = f"../output/{recheck_folder}/table/table_{year}.csv"
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    recheck_pdf_path = os.path.join(script_dir, f"../output/{recheck_folder}/pdf")
+    recheck_table_path = os.path.join(script_dir,f"../output/{recheck_folder}/table/table_{year}.csv")
+    JPG_DIR = os.path.join(script_dir, f"../output/{recheck_folder}/jpg")
 
     data = pd.read_csv(recheck_table_path, encoding='utf-8', header=0)
     for i in range(5):
         redownload_number_list = recheck(data, recheck_pdf_path)
         redownload_company_list = data[data["統一編號"].isin(redownload_number_list)]["公司完整名稱"]
         download_files(data, recheck_pdf_path, year, 1, redownload_company_list)
+        convert_pdf_to_jpg(recheck_pdf_path, JPG_DIR)
 
 
 def main():
@@ -255,5 +258,6 @@ def run(year, flag, cat_entry, prefix_path):
         for i in range(5):
             redownload_list = recheck(data, PDF_DIR)
             download_files(data, PDF_DIR, year, flag, redownload_list)
+            convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
 
         convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
