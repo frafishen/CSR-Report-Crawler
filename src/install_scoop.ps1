@@ -42,6 +42,9 @@ scoop install poppler
 # Install packages from requirements.txt using pip
 # Convert requirements.txt relative path to absolute path
 & "$pythonPath\Scripts\pip.exe" install -r $absoluteRequirementsPath
+& "$pythonPath\Scripts\pip.exe" install pandas
+& "$pythonPath\Scripts\pip.exe" install numpy
+& "$pythonPath\Scripts\pip.exe" install cffi
 
 
 # Run the main.py script with Python

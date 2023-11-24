@@ -140,29 +140,43 @@ def download_file_with_retry(url, file_name, retries=3):
             raise e
     sleep(random.uniform(10, 20))
 
-def download_files(data, download_path, year, flag, new_company_list):
-    data = data[data['公司完整名稱'].isin(new_company_list)]  # Filter data based on company_list
+def download_files(data, csv_path, xsl_path, download_path, year, flag, new_company_list):
+
+    # Filter data based on new_company_list
+    filtered_data = data[data['公司完整名稱'].isin(new_company_list)]
+
     print("待下載之更新公司名單")
-    print(data['公司完整名稱'])
-    if len(data) == 0:
+    print(filtered_data['公司完整名稱'])
+
+    if len(filtered_data) == 0:
         print("No new companies to download.")
         return
+    
     if flag == 1:
-        for i in tqdm(range(len(data["CSR報告超連結"])), desc="Downloading reports"):
-            url = data["CSR報告超連結"].iloc[i]
-            file_name = os.path.join(download_path, str(year) + str(data["統一編號"].iloc[i]) + ".pdf")
+        for i in tqdm(range(len(filtered_data["CSR報告超連結"])), desc="Downloading reports"):
+            url = filtered_data["CSR報告超連結"].iloc[i]
+            file_name = os.path.join(download_path, str(year) + str(filtered_data["統一編號"].iloc[i]) + ".pdf")
             
             try:
                 download_file_with_retry(url, file_name)
+                data["Downloaded"].iloc[i] = True
             except Exception as e:
                 print(f"Failed to download {url} due to {e}")
 
     else:
-        for i in range(0,1):
-            url = data["CSR報告超連結"].iloc[i]
-            file_name = os.path.join(download_path, str(year) + str(data["統一編號"].iloc[i]) + ".pdf")
-            urllib.request.urlretrieve(url, file_name)
-            sleep(3)
+        for i in range(len(filtered_data)):
+            url = filtered_data["CSR報告超連結"].iloc[i]
+            file_name = os.path.join(download_path, str(year) + str(filtered_data["統一編號"].iloc[i]) + ".pdf")
+            try:
+                urllib.request.urlretrieve(url, file_name)
+                sleep(3)
+                data["Downloaded"].iloc[i] = True
+            except Exception as e:
+                print(f"Failed to download {url} due to {e}")
+
+    data.to_csv(csv_path, encoding='utf-8', index=False)
+    data.to_excel(xsl_path, index=False)
+
 
 def convert_pdf_to_jpg(pdf_dir, jpg_save_dir):
     for pdf_file in tqdm(glob.glob(os.path.join(pdf_dir, "*.pdf")), desc = "Download Covers"):
@@ -214,8 +228,8 @@ def run_recheck(year, recheck_folder):
     for i in range(5):
         redownload_number_list = recheck(data, recheck_pdf_path)
         redownload_company_list = data[data["統一編號"].isin(redownload_number_list)]["公司完整名稱"]
-        download_files(data, recheck_pdf_path, year, 1, redownload_company_list)
-        convert_pdf_to_jpg(recheck_pdf_path, JPG_DIR)
+        download_files(data, recheck_table_path, recheck_pdf_path, year, 1, redownload_company_list)
+    convert_pdf_to_jpg(recheck_pdf_path, JPG_DIR)
 
 
 def main():
@@ -249,15 +263,20 @@ def run(year, flag, cat_entry, prefix_path):
         data, company_name = read_data(companyData_path_csv, company_name_path)
         data = match_and_modify_data(data, company_name)
         data_copy = data.copy()
+        # Add 'Downloaded' column if it does not exist
+        if 'Downloaded' not in data_copy.columns:
+            data_copy['Downloaded'] = False
+
         data_copy.to_csv(companyData_path_csv, encoding='utf-8', index=False)
         data_copy.to_excel(companyData_path_excel, index=False)
         new_company_list = get_new_companies(cat_entry, year)
-        download_files(data, PDF_DIR, year, flag, new_company_list)
+        download_files(data_copy, companyData_path_csv, companyData_path_excel, PDF_DIR, year, flag, new_company_list)
+
         
         # Check whether the downloaded files are corrupted or not by checking their md5sum values and delete them when they're corrupted
         for i in range(5):
             redownload_list = recheck(data, PDF_DIR)
-            download_files(data, PDF_DIR, year, flag, redownload_list)
-            convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
-
+            download_files(data, companyData_path_csv, PDF_DIR, year, flag, redownload_list)
         convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
+
+        # convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
