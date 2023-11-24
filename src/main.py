@@ -149,7 +149,15 @@ def setup_gui():
         selected_value = dropdown.GetStringSelection()
         start_process(selected_value)
         
-    def download_all(evt):
+    def download_all_adjusted(evt):
+        year = int(year_entry.GetValue())
+        create_folders(evt)
+        start_button_handler(evt)
+        clicked_buttons = [12,17]
+        hc.run(year, clicked_buttons, len(clicked_buttons), prefix_path, cat_entry)
+        ok_clicked(1)
+    
+    def download_all_adjusted(evt):
         year = int(year_entry.GetValue())
         create_folders(evt)
         start_button_handler(evt)
@@ -163,8 +171,11 @@ def setup_gui():
     
     year_label = wx.StaticText(canvas, label="Year:", pos=(10, 10))
 
-    last_check_button = wx.Button(canvas, wx.ID_ANY, "Last Check Download All", pos=(10, 40))
-    last_check_button.Bind(wx.EVT_BUTTON, lambda evt: download_all(evt))
+    download_all_button = wx.Button(canvas, wx.ID_ANY, "Download All", pos=(10, 40))
+    download_all_button.Bind(wx.EVT_BUTTON, lambda evt: download_all_adjusted(evt))
+
+    last_check_button = wx.Button(canvas, wx.ID_ANY, "Download All Adjusted Report", pos=(120, 40))
+    last_check_button.Bind(wx.EVT_BUTTON, lambda evt: download_all_adjusted(evt))
 
     year_entry = wx.TextCtrl(canvas, pos=(60, 10), size=(100, -1))
     choices = ['上市', '上櫃', '興櫃', '公開發行']
