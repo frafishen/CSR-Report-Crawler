@@ -274,9 +274,9 @@ def run(year, flag, cat_entry, prefix_path):
 
         
         # Check whether the downloaded files are corrupted or not by checking their md5sum values and delete them when they're corrupted
-        for i in range(5):
-            redownload_list = recheck(data, PDF_DIR)
-            download_files(data, companyData_path_csv, PDF_DIR, year, flag, redownload_list)
-        convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
+        # for i in range(5):
+        #     redownload_list = recheck(data, PDF_DIR)
+        #     download_files(data, companyData_path_csv, PDF_DIR, year, flag, redownload_list)
+        # convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
 
         # convert_pdf_to_jpg(PDF_DIR, JPG_DIR)

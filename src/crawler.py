@@ -70,7 +70,7 @@ def extract_table_data(browser, year: int) -> pd.DataFrame:
     header_df = pd.DataFrame([merged_header])
     header_df = pd.concat([header_df, additional_columns_df], axis=1, ignore_index=True)
 
-    header_df.to_csv(f"{TABLE_PATH}header_row_{year+1911}.csv", index=False)
+    header_df.to_csv(f"{TABLE_PATH}header_row_{year+1912}.csv", index=False)
 
     table_rows = browser.find_elements(By.XPATH, '//*[@id="table01"]/table/tbody/tr[contains(@class, "odd") or contains(@class, "even")]')
     rows_html = [row.get_attribute('outerHTML') for row in table_rows]
@@ -91,14 +91,14 @@ def run(year: int, prefix_path: str, cat_entry:str) -> int:
     """Main function to run the crawler for a specific year."""
     load_config(prefix_path)
     result = get_table_for_year(year, cat_entry)
-    result.to_csv(f"{TABLE_PATH}table_{year+1911}.csv", encoding='utf-8', index=False)
+    result.to_csv(f"{TABLE_PATH}table_{year+1912}.csv", encoding='utf-8', index=False)
     return result.shape[1]
 
 def main():
     """Main entry point of the script."""
     year = 111
     result = get_table_for_year(year)
-    result.to_csv("../output/table/table_{}.csv".format(year+1911), encoding='utf-8', index=False)
+    result.to_csv("../output/table/table_{}.csv".format(year+1912), encoding='utf-8', index=False)
 
 if __name__ == "__main__":
     main()

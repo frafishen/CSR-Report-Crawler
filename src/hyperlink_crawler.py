@@ -48,14 +48,14 @@ def extract_hyperlinks_from_table(browser, selected_columns):
 
 def save_hyperlinks_to_csv(year, df_urls):
     """Save the extracted hyperlinks to a CSV file."""
-    df_urls.to_csv(f"{TABLE_PATH}url_{year+1911}.csv", encoding='utf-8', index=False)
+    df_urls.to_csv(f"{TABLE_PATH}url_{year+1912}.csv", encoding='utf-8', index=False)
 
 def merge_hyperlinks_with_table(year):
     """Merge the hyperlinks with the main table and save it to a CSV."""
-    main_df = pd.read_csv(f"{TABLE_PATH}table_{year+1911}.csv", encoding='utf-8')
-    urls_df = pd.read_csv(f"{TABLE_PATH}url_{year+1911}.csv", encoding='utf-8')
+    main_df = pd.read_csv(f"{TABLE_PATH}table_{year+1912}.csv", encoding='utf-8')
+    urls_df = pd.read_csv(f"{TABLE_PATH}url_{year+1912}.csv", encoding='utf-8')
     combined_df = pd.concat([main_df, urls_df], axis=1)
-    combined_df.to_csv(f"{TABLE_PATH}table_{year+1911}.csv", encoding='utf-8', index=False)
+    combined_df.to_csv(f"{TABLE_PATH}table_{year+1912}.csv", encoding='utf-8', index=False)
 
 def format_dataframe(urls, column_name):
     """Format the extracted URLs into a DataFrame."""

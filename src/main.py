@@ -73,14 +73,14 @@ def on_dropdown_change(event):
 
 def start_process(cat_entry):
     year = int(year_entry.GetValue())
-    csv_path = f"{TABLE_PATH}table_{year + 1911}.csv"
+    csv_path = f"{TABLE_PATH}table_{year + 1912}.csv"
     get_table(cat_entry)
     display_csv_buttons(csv_path)
 
 def ok_clicked(flag):
     status_text.AppendText("\nOK button clicked.")
     year = int(year_entry.GetValue())
-    dl.run(year + 1911, flag, cat_entry, prefix_path)
+    dl.run(year + 1912, flag, cat_entry, prefix_path)
     status_text.AppendText("\nDownload process completed.")
 
 def reset_clicked():
@@ -131,13 +131,13 @@ def get_table(cat_entry):
     crawler.run(year, prefix_path, cat_entry)
     status_text.Clear()
     status_text.AppendText(f"{len(clicked_buttons)} columns processed.")
-    status_text.AppendText(f"\nData saved at {TABLE_PATH}table_{year + 1911}.csv")
+    status_text.AppendText(f"\nData saved at {TABLE_PATH}table_{year + 1912}.csv")
 
 def recheck(recheck_entry):
     recheck_folder = str(recheck_entry.GetValue())
     year = int(year_entry.GetValue())
     status_text.AppendText(f"\nrecheck folder: {recheck_folder}")
-    dl.run_recheck(year+1911, recheck_folder)
+    dl.run_recheck(year + 1912, recheck_folder)
     status_text.AppendText(f"\ncomplete recheck")
 
 def setup_gui():
