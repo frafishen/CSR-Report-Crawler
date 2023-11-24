@@ -140,23 +140,37 @@ def recheck(recheck_entry):
     dl.run_recheck(year + 1912, recheck_folder)
     status_text.AppendText(f"\ncomplete recheck")
 
+
+
 def setup_gui():
     global year_entry, status_text, canvas
 
+    def start_button_handler(evt):
+        selected_value = dropdown.GetStringSelection()
+        start_process(selected_value)
+        
+    def download_all(evt):
+        year = int(year_entry.GetValue())
+        create_folders(evt)
+        start_button_handler(evt)
+        clicked_buttons = [12,17]
+        hc.run(year, clicked_buttons, len(clicked_buttons), prefix_path, cat_entry)
+        ok_clicked(3)
+        
     app = wx.App(False)
     root = wx.Frame(None, title="CSR Report Crawler", size=(1200, 600))
     canvas = wx.Panel(root, size=(1200, 600))
     
     year_label = wx.StaticText(canvas, label="Year:", pos=(10, 10))
+
+    last_check_button = wx.Button(canvas, wx.ID_ANY, "Last Check Download All", pos=(10, 40))
+    last_check_button.Bind(wx.EVT_BUTTON, lambda evt: download_all(evt))
+
     year_entry = wx.TextCtrl(canvas, pos=(60, 10), size=(100, -1))
     choices = ['上市', '上櫃', '興櫃', '公開發行']
     dropdown = wx.ComboBox(canvas, pos=(170, 10), choices=choices, style=wx.CB_READONLY)
     dropdown.SetSelection(0)
     dropdown.Bind(wx.EVT_COMBOBOX, lambda evt: on_dropdown_change(evt))
-
-    def start_button_handler(evt):
-        selected_value = dropdown.GetStringSelection()
-        start_process(selected_value)
     
     check_setting_button = wx.Button(canvas, wx.ID_ANY, "0. Create Folders", pos=(300, 10))
     check_setting_button.Bind(wx.EVT_BUTTON, create_folders)

@@ -121,6 +121,17 @@ def get_new_companies(cat_entry, year):
     new_companies = set(latest_table["公司完整名稱"]) - set(previous_table["公司完整名稱"])
     return list(new_companies)
 
+def get_adjusted_companies(cat_entry, year):
+    """
+    This function returns the list of company names with adjusted reports.
+    """
+    base_directory = get_latest_directory(cat_entry)
+    path = os.path.join(base_directory[0], f"table/table_{year}.csv")
+    df = pd.read_csv(path)
+    adjusted_companies = df[df["中文版永續報告書(修正後版本)"].notna()]['公司完整名稱'].tolist()
+    print('有調整的報告書')
+    print(adjusted_companies)
+    return adjusted_companies
 
 def download_file_with_retry(url, file_name, retries=3):
     user_agent = random.choice(USER_AGENTS)
@@ -159,7 +170,7 @@ def download_files(data, csv_path, xsl_path, download_path, year, flag, new_comp
             
             try:
                 download_file_with_retry(url, file_name)
-                data["Downloaded"].iloc[i] = True
+                data["Downloaded"][data['公司完整名稱'] == filtered_data['公司完整名稱'].iloc[i]] = True
             except Exception as e:
                 print(f"Failed to download {url} due to {e}")
 
@@ -170,7 +181,7 @@ def download_files(data, csv_path, xsl_path, download_path, year, flag, new_comp
             try:
                 urllib.request.urlretrieve(url, file_name)
                 sleep(3)
-                data["Downloaded"].iloc[i] = True
+                data["Downloaded"][data['公司完整名稱'] == filtered_data['公司完整名稱'].iloc[i]] = True
             except Exception as e:
                 print(f"Failed to download {url} due to {e}")
 
@@ -269,9 +280,12 @@ def run(year, flag, cat_entry, prefix_path):
 
         data_copy.to_csv(companyData_path_csv, encoding='utf-8', index=False)
         data_copy.to_excel(companyData_path_excel, index=False)
-        new_company_list = get_new_companies(cat_entry, year)
-        download_files(data_copy, companyData_path_csv, companyData_path_excel, PDF_DIR, year, flag, new_company_list)
-
+        if flag == 1:
+            new_company_list = get_new_companies(cat_entry, year)
+            download_files(data_copy, companyData_path_csv, companyData_path_excel, PDF_DIR, year, flag, new_company_list)
+        else:
+            adjust_company_list = get_adjusted_companies(cat_entry, year)
+            download_files(data_copy, companyData_path_csv, companyData_path_excel, PDF_DIR, year, flag, adjust_company_list)
         
         # Check whether the downloaded files are corrupted or not by checking their md5sum values and delete them when they're corrupted
         # for i in range(5):
