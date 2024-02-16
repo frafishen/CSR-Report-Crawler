@@ -291,6 +291,6 @@ def run(year, flag, cat_entry, prefix_path):
         # for i in range(5):
         #     redownload_list = recheck(data, PDF_DIR)
         #     download_files(data, companyData_path_csv, PDF_DIR, year, flag, redownload_list)
-        # convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
+        convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
 
         # convert_pdf_to_jpg(PDF_DIR, JPG_DIR)
